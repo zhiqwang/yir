@@ -14,7 +14,7 @@ from collections import OrderedDict
 from graphviz import Digraph
 
 
-class TorchScriptVisualizer:
+class JitVisualizer:
     def __init__(self, module):
 
         self.module = module
