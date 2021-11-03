@@ -24,9 +24,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "../common/util.h"
-#include "../common/xbuffer.h"
-#include "xattr.h"
+#include "util.h"
+#include "buffer.h"
+#include "attr.h"
 
 namespace yir {
 namespace graph {
@@ -40,14 +40,14 @@ struct XLayer {
   std::vector<std::string> bottoms;
   std::vector<std::string> tops;
   std::vector<std::string> layer;
-  std::vector<XBuffer> data;
+  std::vector<Buffer> data;
   std::vector<std::string> targets;
   std::string target;
   std::string subgraph;
   // std::unique_ptr<XGraph> subgraph_data;
   std::vector<XLayer>* subgraph_data = nullptr;
   bool internal;
-  std::unordered_map<std::string, XAttr> attrs;
+  std::unordered_map<std::string, Attr> attrs;
 
   static std::set<std::string> input_types_;
 
@@ -78,13 +78,13 @@ struct XLayer {
       const std::vector<std::string>& bottoms_ = std::vector<std::string>(),
       const std::vector<std::string>& tops_ = std::vector<std::string>(),
       const std::vector<std::string>& layer_ = std::vector<std::string>(),
-      const std::vector<XBuffer>& data_ = std::vector<XBuffer>(),
+      const std::vector<Buffer>& data_ = std::vector<Buffer>(),
       const std::vector<std::string>& targets_ = std::vector<std::string>(),
       const std::string& target_ = std::string(),
       const std::string& subgraph_ = std::string(),
       const bool internal_ = false,
-      const std::unordered_map<std::string, XAttr> attrs_ =
-          std::unordered_map<std::string, XAttr>())
+      const std::unordered_map<std::string, Attr> attrs_ =
+          std::unordered_map<std::string, Attr>())
       : name(name_),
         xtype(xtype_),
         shapes(shapes_),
@@ -129,16 +129,16 @@ struct XLayer {
     return name;
   }
 
-  std::vector<XBuffer>& get_data() {
+  std::vector<Buffer>& get_data() {
     return data;
   }
 
-  void set_data(const std::vector<XBuffer>& data_) {
+  void set_data(const std::vector<Buffer>& data_) {
     // TODO: 2 copies done of original buffer data before being added to XLayer
     //  object
     data.clear();
     for (auto xb : data_)
-      data.push_back(XBuffer(xb));
+      data.push_back(Buffer(xb));
   }
 
   std::vector<XLayer>* get_subgraph_data() {
@@ -213,7 +213,7 @@ struct XLayer {
     return attrs.find(attr_name) != attrs.end();
   }
 
-  XAttr& get_attr(const std::string& attr_name) {
+  Attr& get_attr(const std::string& attr_name) {
     if (!has_attr(attr_name))
       throw std::invalid_argument(
           "Trying to retrieve non existing attribute"
@@ -222,7 +222,7 @@ struct XLayer {
     return attrs[attr_name];
   }
 
-  void set_attr(const std::string& attr_name, XAttr&& xattr) {
+  void set_attr(const std::string& attr_name, Attr&& xattr) {
     attrs[attr_name] = std::move(xattr);
   }
 

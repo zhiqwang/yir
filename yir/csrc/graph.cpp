@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "xgraph.h"
+#include "graph.h"
 
 #include <cassert>
 #include <functional>
@@ -23,7 +23,7 @@
 namespace yir {
 namespace graph {
 
-std::vector<std::string> XGraph::get_layer_names() {
+std::vector<std::string> Graph::get_layer_names() {
   std::vector<std::string> layers;
   std::unordered_set<std::string> visited;
   std::function<void(std::string, std::vector<std::string>&, std::unordered_set<std::string>&)>
@@ -50,7 +50,7 @@ std::vector<std::string> XGraph::get_layer_names() {
   return layers;
 }
 
-void XGraph::update(const std::string& xl_name) {
+void Graph::update(const std::string& xl_name) {
   // XLayer &xl = get(xl_name);
   std::shared_ptr<XLayer> xl = get(xl_name);
 
@@ -100,7 +100,7 @@ void XGraph::update(const std::string& xl_name) {
     tails.push_back(xl->name);
 }
 
-void XGraph::add(XLayer& xl) {
+void Graph::add(XLayer& xl) {
   if (contains(xl.name))
     throw std::invalid_argument(
         "Could not add xlayer with name: " + xl.name + "as the layer already" + " exists.");
@@ -115,7 +115,7 @@ void XGraph::add(XLayer& xl) {
   ++idx_;
 }
 
-void XGraph::remove(const std::string& xl_name) {
+void Graph::remove(const std::string& xl_name) {
   std::shared_ptr<XLayer> xl = get(xl_name);
 
   for (auto b : xl->bottoms) {

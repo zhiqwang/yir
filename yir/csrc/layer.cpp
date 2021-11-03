@@ -14,7 +14,7 @@
  *  limitations under the License.
  */
 
-#include "xlayer.h"
+#include "layer.h"
 
 namespace yir {
 namespace graph {

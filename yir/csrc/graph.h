@@ -23,18 +23,18 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "../common/util.h"
-#include "xlayer.h"
+#include "util.h"
+#include "layer.h"
 
 namespace yir {
 namespace graph {
 
-class XGraph {
+class Graph {
  public:
-  XGraph(const std::string& name_) : name(name_) {}
-  // std::cout << "Construct XGraph " << this << std::endl;
+  Graph(const std::string& name_) : name(name_) {}
+  // std::cout << "Construct Graph " << this << std::endl;
 
-  void copy(const XGraph& xg) {
+  void copy(const Graph& xg) {
     name = xg.name;
     heads = xg.heads;
     tails = xg.tails;
@@ -64,7 +64,7 @@ class XGraph {
       throw std::invalid_argument(
           "Trying to retrieve non existing meta"
           " attribute with name: " +
-          attr_name + " in XGraph: " + get_name());
+          attr_name + " in Graph: " + get_name());
     return meta_attrs[attr_name];
   }
 
@@ -147,7 +147,7 @@ class XGraph {
 
   std::unordered_map<std::string, XAttr> meta_attrs;
 
-  // ~XGraph() { std::cout << "Delete XGraph: " << this << std::endl; }
+  // ~Graph() { std::cout << "Delete Graph: " << this << std::endl; }
 
  private:
   void remove_head(const std::string& xl_name) {
@@ -181,6 +181,6 @@ class XGraph {
 
 } // namespace graph
 
-typedef std::shared_ptr<yir::graph::XGraph> XGraphHolder;
+typedef std::shared_ptr<yir::graph::Graph> XGraphHolder;
 
 } // namespace yir

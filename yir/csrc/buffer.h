@@ -25,7 +25,7 @@
 
 namespace yir {
 
-struct XBuffer {
+struct Buffer {
   void* data;
   ssize_t itemsize;
   std::string format;
@@ -36,7 +36,7 @@ struct XBuffer {
   ssize_t size;
   bool own_data;
 
-  XBuffer(const XBuffer& xb)
+  Buffer(const Buffer& xb)
       : itemsize(xb.itemsize),
         format(xb.format),
         ndim(xb.ndim),
@@ -51,7 +51,7 @@ struct XBuffer {
     memcpy(data, xb.data, size * itemsize);
   }
 
-  XBuffer(XBuffer&& xb)
+  Buffer(Buffer&& xb)
       : itemsize(xb.itemsize),
         format(xb.format),
         ndim(xb.ndim),
@@ -66,7 +66,7 @@ struct XBuffer {
     data = xb.data;
   }
 
-  XBuffer(
+  Buffer(
       void* data_,
       ssize_t itemsize_,
       std::string format_,
@@ -83,10 +83,10 @@ struct XBuffer {
         strides(strides_),
         size(1),
         own_data(own_data_) {
-    // std::cout << "Initialize XBuffer " << this << std::endl;
+    // std::cout << "Initialize Buffer " << this << std::endl;
     if (ndim != (ssize_t)shape.size() || ndim != (ssize_t)strides.size())
       throw std::invalid_argument(
-          "XBuffer: ndim doesn't match shape and/or"
+          "Buffer: ndim doesn't match shape and/or"
           " strides length");
     for (ssize_t i = 0; i < (ssize_t)ndim; ++i)
       size *= shape[i];
@@ -101,7 +101,7 @@ struct XBuffer {
     }
   }
 
-  XBuffer(
+  Buffer(
       void* data_,
       ssize_t itemsize_,
       std::string format_,
@@ -118,7 +118,7 @@ struct XBuffer {
         own_data(own_data_) {
     if (ndim != (ssize_t)shape.size()) // || ndim != (ssize_t) strides.size()
       throw std::invalid_argument(
-          "XBuffer: ndim doesn't match shape and/or"
+          "Buffer: ndim doesn't match shape and/or"
           " strides length");
     for (ssize_t i = 0; i < (ssize_t)ndim; ++i)
       size *= shape[i];
@@ -141,7 +141,7 @@ struct XBuffer {
     }
   }
 
-  XBuffer& operator=(const XBuffer& xb) {
+  Buffer& operator=(const Buffer& xb) {
     if (&xb == this)
       return *this;
     // Release data if we are owning it
@@ -159,7 +159,7 @@ struct XBuffer {
     return *this;
   }
 
-  XBuffer& operator=(XBuffer&& xb) {
+  Buffer& operator=(Buffer&& xb) {
     if (&xb == this)
       return *this;
     // Release data if we are owning it
@@ -188,13 +188,13 @@ struct XBuffer {
     own_data = false;
   }
 
-  ~XBuffer() {
+  ~Buffer() {
     if (own_data)
       ::operator delete(data);
   }
 };
 
-typedef std::shared_ptr<XBuffer> XBufferHolder;
+typedef std::shared_ptr<Buffer> XBufferHolder;
 
 inline XBufferHolder create_buffer(std::vector<ssize_t>& shape) {
   int64_t size = 1;
@@ -206,8 +206,8 @@ inline XBufferHolder create_buffer(std::vector<ssize_t>& shape) {
   if (size < 0)
     size *= -1;
   void* input_data = malloc(4 * size);
-  return std::shared_ptr<XBuffer>(
-      new XBuffer(input_data, 4, "f", buffer_shape.size(), shape, false, true));
+  return std::shared_ptr<Buffer>(
+      new Buffer(input_data, 4, "f", buffer_shape.size(), shape, false, true));
 }
 
 } // namespace yir

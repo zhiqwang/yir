@@ -23,7 +23,7 @@
 namespace yir {
 namespace graph {
 
-struct XAttr {
+struct Attr {
   typedef std::unordered_map<std::string, std::vector<std::string>> MapStrVectorStr;
   typedef std::unordered_map<std::string, std::string> MapStrStr;
 
@@ -42,47 +42,47 @@ struct XAttr {
     MapStrVectorStr* map_str_vstr;
   };
 
-  XAttr() : name("empty"), type("UNDEFINED") {}
-  XAttr(const XAttr& xa) {
+  Attr() : name("empty"), type("UNDEFINED") {}
+  Attr(const Attr& xa) {
     init(xa);
   }
 
-  XAttr(const std::string& name_) : name(name_), type("UNDEFINED") {}
+  Attr(const std::string& name_) : name(name_), type("UNDEFINED") {}
 
-  XAttr(const std::string& name_, bool b_) : name(name_), type("BOOL"), b(b_) {}
+  Attr(const std::string& name_, bool b_) : name(name_), type("BOOL"), b(b_) {}
 
-  XAttr(const std::string& name_, int i_) : name(name_), type("INT"), i(i_) {}
+  Attr(const std::string& name_, int i_) : name(name_), type("INT"), i(i_) {}
 
-  XAttr(const std::string& name_, const std::vector<int64_t> ints_) : name(name_), type("INTS") {
+  Attr(const std::string& name_, const std::vector<int64_t> ints_) : name(name_), type("INTS") {
     set_ints(ints_);
   }
 
-  XAttr(const std::string& name_, const std::vector<std::vector<int64_t>> ints2d_)
+  Attr(const std::string& name_, const std::vector<std::vector<int64_t>> ints2d_)
       : name(name_), type("INTS2D") {
     set_ints2d(ints2d_);
   }
 
-  XAttr(const std::string& name_, double f_) : name(name_), type("FLOAT"), f(f_) {}
+  Attr(const std::string& name_, double f_) : name(name_), type("FLOAT"), f(f_) {}
 
-  XAttr(const std::string& name_, const std::vector<double> floats_) : name(name_), type("FLOATS") {
+  Attr(const std::string& name_, const std::vector<double> floats_) : name(name_), type("FLOATS") {
     set_floats(floats_);
   }
 
-  XAttr(const std::string& name_, const std::string s_) : name(name_), type("STRING") {
+  Attr(const std::string& name_, const std::string s_) : name(name_), type("STRING") {
     set_string(s_);
   }
 
-  XAttr(const std::string& name_, const std::vector<std::string> strings_)
+  Attr(const std::string& name_, const std::vector<std::string> strings_)
       : name(name_), type("STRINGS") {
     set_strings(strings_);
   }
 
-  XAttr(const std::string& name_, const MapStrStr& map_str_str_)
+  Attr(const std::string& name_, const MapStrStr& map_str_str_)
       : name(name_), type("MAP_STR_STR") {
     set_map_str_str(map_str_str_);
   }
 
-  XAttr(const std::string& name_, const MapStrVectorStr map_str_vstr_)
+  Attr(const std::string& name_, const MapStrVectorStr map_str_vstr_)
       : name(name_), type("MAP_STR_VSTR") {
     set_map_str_vstr(map_str_vstr_);
   }
@@ -104,7 +104,7 @@ struct XAttr {
       delete map_str_vstr;
   }
 
-  XAttr& operator=(const XAttr& xa) {
+  Attr& operator=(const Attr& xa) {
     // Possibly we change type so we have to clean up
     clean_up(type);
 
@@ -112,7 +112,7 @@ struct XAttr {
     return *this;
   }
 
-  void init(const XAttr& xa, bool clean_up = false) {
+  void init(const Attr& xa, bool clean_up = false) {
     name = xa.name;
     type = xa.type;
 
@@ -141,20 +141,20 @@ struct XAttr {
   bool get_bool() {
     if (type != "BOOL")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: BOOL");
+          "Trying to retrieve Attr value of type: " + type + " as type: BOOL");
     return b;
   }
 
   int get_int() {
     if (type != "INT")
-      throw std::runtime_error("Trying to retrieve XAttr value of type: " + type + " as type: INT");
+      throw std::runtime_error("Trying to retrieve Attr value of type: " + type + " as type: INT");
     return i;
   }
 
   std::vector<int64_t>& get_ints() {
     if (type != "INTS")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: INTS");
+          "Trying to retrieve Attr value of type: " + type + " as type: INTS");
     return *ints;
   }
   void set_ints(const std::vector<int64_t> ints_, bool clean_up = false) {
@@ -166,7 +166,7 @@ struct XAttr {
   std::vector<std::vector<int64_t>>& get_ints2d() {
     if (type != "INTS2D")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: INTS2D");
+          "Trying to retrieve Attr value of type: " + type + " as type: INTS2D");
     return *ints2d;
   }
 
@@ -179,14 +179,14 @@ struct XAttr {
   float get_float() {
     if (type != "FLOAT")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: FLOAT");
+          "Trying to retrieve Attr value of type: " + type + " as type: FLOAT");
     return f;
   }
 
   std::vector<double>& get_floats() {
     if (type != "FLOATS")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: FLOATS");
+          "Trying to retrieve Attr value of type: " + type + " as type: FLOATS");
     return *floats;
   }
 
@@ -199,7 +199,7 @@ struct XAttr {
   std::string& get_string() {
     if (type != "STRING")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: STRING");
+          "Trying to retrieve Attr value of type: " + type + " as type: STRING");
     return *s;
   }
 
@@ -212,7 +212,7 @@ struct XAttr {
   std::vector<std::string>& get_strings() {
     if (type != "STRINGS")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: STRINGS");
+          "Trying to retrieve Attr value of type: " + type + " as type: STRINGS");
     return *strings;
   }
 
@@ -225,7 +225,7 @@ struct XAttr {
   MapStrStr& get_map_str_str() {
     if (type != "MAP_STR_STR")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: MAP_STR_STR");
+          "Trying to retrieve Attr value of type: " + type + " as type: MAP_STR_STR");
     return *map_str_str;
   }
 
@@ -238,7 +238,7 @@ struct XAttr {
   MapStrVectorStr& get_map_str_vstr() {
     if (type != "MAP_STR_VSTR")
       throw std::runtime_error(
-          "Trying to retrieve XAttr value of type: " + type + " as type: MAP_STR_VSTR");
+          "Trying to retrieve Attr value of type: " + type + " as type: MAP_STR_VSTR");
     return *map_str_vstr;
   }
   void set_map_str_vstr(const MapStrVectorStr map_str_vstr_, bool clean_up = false) {
@@ -247,7 +247,7 @@ struct XAttr {
     map_str_vstr = new MapStrVectorStr(map_str_vstr_);
   }
 
-  ~XAttr() {
+  ~Attr() {
     clean_up(type);
   }
 };
