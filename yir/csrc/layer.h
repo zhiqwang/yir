@@ -31,7 +31,7 @@
 namespace yir {
 namespace graph {
 
-struct XLayer {
+struct Layer {
   std::string name;
   std::vector<std::string> xtype;
   std::vector<std::vector<int64_t>> shapes;
@@ -45,13 +45,13 @@ struct XLayer {
   std::string target;
   std::string subgraph;
   // std::unique_ptr<XGraph> subgraph_data;
-  std::vector<XLayer>* subgraph_data = nullptr;
+  std::vector<Layer>* subgraph_data = nullptr;
   bool internal;
   std::unordered_map<std::string, Attr> attrs;
 
   static std::set<std::string> input_types_;
 
-  XLayer(const XLayer& xl)
+  Layer(const Layer& xl)
       : name(xl.name),
         xtype(xl.xtype),
         shapes(xl.shapes),
@@ -69,7 +69,7 @@ struct XLayer {
     set_subgraph_data(xl.subgraph_data);
   };
 
-  XLayer(
+  Layer(
       const std::string& name_ = std::string(),
       const std::vector<std::string>& xtype_ = std::vector<std::string>(),
       const std::vector<std::vector<int64_t>>& shapes_ = std::vector<std::vector<int64_t>>(),
@@ -98,15 +98,15 @@ struct XLayer {
         internal(internal_),
         attrs(attrs_) {
     set_data(data_);
-    subgraph_data = new std::vector<XLayer>();
+    subgraph_data = new std::vector<Layer>();
   }
 
-  XLayer& operator=(const XLayer& xl) {
+  Layer& operator=(const Layer& xl) {
     init(xl);
     return *this;
   };
 
-  void init(const XLayer& xl) {
+  void init(const Layer& xl) {
     name = xl.name;
     xtype = xl.xtype;
     shapes = xl.shapes;
@@ -133,31 +133,31 @@ struct XLayer {
   }
 
   void set_data(const std::vector<Buffer>& data_) {
-    // TODO: 2 copies done of original buffer data before being added to XLayer
+    // TODO: 2 copies done of original buffer data before being added to Layer
     //  object
     data.clear();
     for (auto xb : data_)
       data.push_back(Buffer(xb));
   }
 
-  std::vector<XLayer>* get_subgraph_data() {
+  std::vector<Layer>* get_subgraph_data() {
     return subgraph_data;
   }
 
-  void set_subgraph_data(const std::vector<XLayer>& subgraph_data_) {
+  void set_subgraph_data(const std::vector<Layer>& subgraph_data_) {
     if (subgraph_data)
       delete subgraph_data;
 
-    subgraph_data = new std::vector<XLayer>();
+    subgraph_data = new std::vector<Layer>();
     for (auto const& e : subgraph_data_)
       subgraph_data->push_back(e);
   }
 
-  void set_subgraph_data(std::vector<XLayer>* subgraph_data_) {
+  void set_subgraph_data(std::vector<Layer>* subgraph_data_) {
     if (subgraph_data)
       delete subgraph_data;
 
-    subgraph_data = new std::vector<XLayer>();
+    subgraph_data = new std::vector<Layer>();
     for (auto const e : *subgraph_data_)
       subgraph_data->push_back(e);
   }
@@ -217,7 +217,7 @@ struct XLayer {
       throw std::invalid_argument(
           "Trying to retrieve non existing attribute"
           " with name: " +
-          attr_name + " in XLayer: " + get_name());
+          attr_name + " in Layer: " + get_name());
     return attrs[attr_name];
   }
 
@@ -225,13 +225,13 @@ struct XLayer {
     attrs[attr_name] = std::move(xattr);
   }
 
-  ~XLayer() {
+  ~Layer() {
     delete subgraph_data;
   }
 };
 
 } // namespace graph
 
-typedef std::shared_ptr<yir::graph::XLayer> XLayerHolder;
+typedef std::shared_ptr<yir::graph::Layer> LayerHolder;
 
 } // namespace yir

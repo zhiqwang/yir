@@ -19,7 +19,7 @@
 namespace yir {
 namespace graph {
 
-std::set<std::string> XLayer::input_types_ = {"Input", "StrInput"};
+std::set<std::string> Layer::input_types_ = {"Input", "StrInput"};
 
 } // namespace graph
 } // namespace yir

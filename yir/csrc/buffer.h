@@ -194,9 +194,9 @@ struct Buffer {
   }
 };
 
-typedef std::shared_ptr<Buffer> XBufferHolder;
+typedef std::shared_ptr<Buffer> BufferHolder;
 
-inline XBufferHolder create_buffer(std::vector<ssize_t>& shape) {
+inline BufferHolder create_buffer(std::vector<ssize_t>& shape) {
   int64_t size = 1;
   std::vector<ssize_t> buffer_shape;
   for (const int64_t& e : shape) {

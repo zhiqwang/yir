@@ -38,7 +38,7 @@ class Graph {
     name = xg.name;
     heads = xg.heads;
     tails = xg.tails;
-    xlayers = xg.xlayers;
+    layers = xg.layers;
     meta_attrs = xg.meta_attrs;
     xidx_ = xg.xidx_;
     xidx_re_ = xg.xidx_re_;
@@ -59,7 +59,7 @@ class Graph {
     return meta_attrs.find(attr_name) != meta_attrs.end();
   }
 
-  XAttr& get_meta_attr(const std::string& attr_name) {
+  Attr& get_meta_attr(const std::string& attr_name) {
     if (!has_meta_attr(attr_name))
       throw std::invalid_argument(
           "Trying to retrieve non existing meta"
@@ -68,7 +68,7 @@ class Graph {
     return meta_attrs[attr_name];
   }
 
-  void set_meta_attr(const std::string& attr_name, XAttr&& xattr) {
+  void set_meta_attr(const std::string& attr_name, Attr&& xattr) {
     meta_attrs[attr_name] = std::move(xattr);
   }
 
@@ -80,14 +80,14 @@ class Graph {
     return tails;
   }
 
-  // XLayer &get(const std::string &xl_name) { return xlayers[xl_name]; }
-  std::shared_ptr<XLayer> get(const std::string& xl_name_) {
+  // Layer &get(const std::string &xl_name) { return layers[xl_name]; }
+  std::shared_ptr<Layer> get(const std::string& xl_name_) {
     std::string xl_name = yir::stringify(xl_name_);
 
     if (!contains(xl_name))
       throw std::invalid_argument(
           "Can't retrieve xlayer with name: " + xl_name + " as it doesn't exist.");
-    return xlayers[xl_name];
+    return layers[xl_name];
   }
 
   int get_layer_id(const std::string& xl_name_) {
@@ -117,14 +117,14 @@ class Graph {
   std::vector<std::string> get_layer_names();
 
   int len() {
-    return xlayers.size();
+    return layers.size();
   }
 
   // CHECKS //
 
   bool contains(const std::string& xl_name) {
     const std::string xl_name_str = yir::stringify(xl_name);
-    return xlayers.find(xl_name_str) != xlayers.end();
+    return layers.find(xl_name_str) != layers.end();
   }
 
   bool is_input(const std::string& xl_name) {
@@ -139,13 +139,13 @@ class Graph {
 
   // GRAPH MANIPULATION //
 
-  void add(XLayer& xl);
+  void add(Layer& xl);
 
   void remove(const std::string& xl_name);
 
   void update(const std::string& xl_name);
 
-  std::unordered_map<std::string, XAttr> meta_attrs;
+  std::unordered_map<std::string, Attr> meta_attrs;
 
   // ~Graph() { std::cout << "Delete Graph: " << this << std::endl; }
 
@@ -173,7 +173,7 @@ class Graph {
   std::string name;
   std::vector<std::string> heads;
   std::vector<std::string> tails;
-  std::unordered_map<std::string, std::shared_ptr<XLayer>> xlayers;
+  std::unordered_map<std::string, std::shared_ptr<Layer>> layers;
   std::unordered_map<std::string, int> xidx_;
   std::unordered_map<int, std::string> xidx_re_;
   int idx_ = 0;

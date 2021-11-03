@@ -33,8 +33,8 @@ std::vector<std::string> Graph::get_layer_names() {
                  std::string current_,
                  std::vector<std::string>& layers_,
                  std::unordered_set<std::string>& visited_) -> void {
-    // XLayer &cX = this->get(current_);
-    std::shared_ptr<XLayer> cX = this->get(current_);
+    // Layer &cX = this->get(current_);
+    std::shared_ptr<Layer> cX = this->get(current_);
     if (!cX->bottoms.empty())
       for (auto b : cX->bottoms)
         if (visited_.find(b) == visited_.end())
@@ -51,8 +51,8 @@ std::vector<std::string> Graph::get_layer_names() {
 }
 
 void Graph::update(const std::string& xl_name) {
-  // XLayer &xl = get(xl_name);
-  std::shared_ptr<XLayer> xl = get(xl_name);
+  // Layer &xl = get(xl_name);
+  std::shared_ptr<Layer> xl = get(xl_name);
 
   // Check if bottom layers in graph
   for (auto b : xl->bottoms) {
@@ -64,7 +64,7 @@ void Graph::update(const std::string& xl_name) {
 
   // Update bottom layers
   for (auto b : xl->bottoms) {
-    std::shared_ptr<XLayer> bX = xlayers[b];
+    std::shared_ptr<Layer> bX = layers[b];
 
     if (!bX->has_top(xl->name)) {
       bX->add_top(xl->name);
@@ -83,7 +83,7 @@ void Graph::update(const std::string& xl_name) {
 
   // Update top layers
   for (auto t : xl->tops) {
-    std::shared_ptr<XLayer> tX = xlayers[t];
+    std::shared_ptr<Layer> tX = layers[t];
 
     if (!tX->has_bottom(xl->name)) {
       tX->add_bottom(xl->name);
@@ -100,12 +100,12 @@ void Graph::update(const std::string& xl_name) {
     tails.push_back(xl->name);
 }
 
-void Graph::add(XLayer& xl) {
+void Graph::add(Layer& xl) {
   if (contains(xl.name))
     throw std::invalid_argument(
         "Could not add xlayer with name: " + xl.name + "as the layer already" + " exists.");
 
-  xlayers.insert({xl.name, std::make_shared<XLayer>(xl)});
+  layers.insert({xl.name, std::make_shared<Layer>(xl)});
 
   update(xl.name);
 
@@ -116,10 +116,10 @@ void Graph::add(XLayer& xl) {
 }
 
 void Graph::remove(const std::string& xl_name) {
-  std::shared_ptr<XLayer> xl = get(xl_name);
+  std::shared_ptr<Layer> xl = get(xl_name);
 
   for (auto b : xl->bottoms) {
-    std::shared_ptr<XLayer> bX = get(b);
+    std::shared_ptr<Layer> bX = get(b);
     assert(bX->has_top(xl_name));
     bX->remove_top(xl_name);
 
@@ -128,7 +128,7 @@ void Graph::remove(const std::string& xl_name) {
   }
 
   for (auto t : xl->tops) {
-    std::shared_ptr<XLayer> tX = get(t);
+    std::shared_ptr<Layer> tX = get(t);
     assert(tX->has_bottom(xl_name));
     tX->remove_bottom(xl_name);
 
@@ -136,7 +136,7 @@ void Graph::remove(const std::string& xl_name) {
       heads.push_back(t);
   }
 
-  xlayers.erase(xl_name);
+  layers.erase(xl_name);
 
   if (is_input(xl_name))
     remove_head(xl_name);
