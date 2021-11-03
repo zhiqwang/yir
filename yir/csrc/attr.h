@@ -77,8 +77,7 @@ struct Attr {
     set_strings(strings_);
   }
 
-  Attr(const std::string& name_, const MapStrStr& map_str_str_)
-      : name(name_), type("MAP_STR_STR") {
+  Attr(const std::string& name_, const MapStrStr& map_str_str_) : name(name_), type("MAP_STR_STR") {
     set_map_str_str(map_str_str_);
   }
 
@@ -140,8 +139,7 @@ struct Attr {
 
   bool get_bool() {
     if (type != "BOOL")
-      throw std::runtime_error(
-          "Trying to retrieve Attr value of type: " + type + " as type: BOOL");
+      throw std::runtime_error("Trying to retrieve Attr value of type: " + type + " as type: BOOL");
     return b;
   }
 
@@ -153,8 +151,7 @@ struct Attr {
 
   std::vector<int64_t>& get_ints() {
     if (type != "INTS")
-      throw std::runtime_error(
-          "Trying to retrieve Attr value of type: " + type + " as type: INTS");
+      throw std::runtime_error("Trying to retrieve Attr value of type: " + type + " as type: INTS");
     return *ints;
   }
   void set_ints(const std::vector<int64_t> ints_, bool clean_up = false) {

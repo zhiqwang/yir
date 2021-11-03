@@ -24,9 +24,9 @@
 #include <unordered_map>
 #include <vector>
 
-#include "util.h"
-#include "buffer.h"
 #include "attr.h"
+#include "buffer.h"
+#include "util.h"
 
 namespace yir {
 namespace graph {
@@ -83,8 +83,7 @@ struct XLayer {
       const std::string& target_ = std::string(),
       const std::string& subgraph_ = std::string(),
       const bool internal_ = false,
-      const std::unordered_map<std::string, Attr> attrs_ =
-          std::unordered_map<std::string, Attr>())
+      const std::unordered_map<std::string, Attr> attrs_ = std::unordered_map<std::string, Attr>())
       : name(name_),
         xtype(xtype_),
         shapes(shapes_),

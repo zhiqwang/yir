@@ -23,8 +23,8 @@
 #include <unordered_map>
 #include <unordered_set>
 
-#include "util.h"
 #include "layer.h"
+#include "util.h"
 
 namespace yir {
 namespace graph {
