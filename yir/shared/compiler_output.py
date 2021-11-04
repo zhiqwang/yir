@@ -16,12 +16,11 @@
 Data structure for compiler output
 """
 
-import os
 import json
+import os
 
 
 class CompilerOutputElem:
-
     def __init__(self, c_key, code_files=None, in_map=None, out_map=None):
         self.c_key = c_key
         self.code_files = code_files if code_files is not None else []
@@ -48,7 +47,6 @@ class CompilerOutputElem:
 
 
 class CompilerOutput:
-
     def __init__(self, name):
         self.name = name
         self.data = {}
@@ -60,8 +58,7 @@ class CompilerOutput:
         return self.data.keys()
 
     def add(self, c_key, code_files, in_map, out_map):
-        self.data[c_key] = CompilerOutputElem(c_key, code_files,
-                                              in_map, out_map)
+        self.data[c_key] = CompilerOutputElem(c_key, code_files, in_map, out_map)
 
     def get_code_files(self, c_key):
         return self.data[c_key].get_code_files()
@@ -82,5 +79,5 @@ class CompilerOutput:
             d.update(self.get_out_map(c_key))
 
             file_name = os.path.join(file_dir, "compiler_comp_{}.json".format(c_key))
-            with open(file_name, 'w') as f:
+            with open(file_name, "w") as f:
                 json.dump(d, f)

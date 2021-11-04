@@ -22,7 +22,6 @@ from .vector import Vector, StrVector
 
 
 class HashMap:
-
     def __init__(self, h_map_):
         self._map = h_map_
 
@@ -34,9 +33,9 @@ class HashMap:
 
     def __eq__(self, other):
         try:
-            return len(self) == len(other)\
-                and all((k in other and self.__getitem__(k) == other[k]
-                        for k in self.keys()))
+            return len(self) == len(other) and all(
+                (k in other and self.__getitem__(k) == other[k] for k in self.keys())
+            )
         except TypeError:
             return False
 
@@ -119,7 +118,6 @@ class HashMap:
 
 
 class MapStrStr(HashMap):
-
     @classmethod
     def from_dict(cls, d):
         instance = MapStrStr(lpx.MapStrStr())
@@ -128,7 +126,6 @@ class MapStrStr(HashMap):
 
 
 class MapStrVectorStr(HashMap):
-
     def _get_copy(self, key):
         raise NotImplementedError("")
 

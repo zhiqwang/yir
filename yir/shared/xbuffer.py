@@ -14,17 +14,16 @@
 
 """ Module for XBuffer definition and functionality """
 
-import numpy as np
 import libyir as lpx
+import numpy as np
 
 
 class XBuffer:
-
     def __init__(self, ndarray: np.ndarray) -> None:
         self._xb = lpx.XBuffer(ndarray)
 
     @classmethod
-    def from_lib(cls, _xb: lpx.XBuffer) -> 'XBuffer':
+    def from_lib(cls, _xb: lpx.XBuffer) -> "XBuffer":
         xb = XBuffer.__new__(cls)
         xb._xb = _xb
         return xb
@@ -33,14 +32,11 @@ class XBuffer:
         return np.array(self._xb, copy=copy)
 
     def copy_from(self, b):
-        np.copyto(
-            self.to_numpy(),
-            b.to_numpy() if isinstance(b, XBuffer) else b
-        )
+        np.copyto(self.to_numpy(), b.to_numpy() if isinstance(b, XBuffer) else b)
 
     def __getattr__(self, attr):
-        """ Delegate attribute retrieval to numpy instatiation of
-            internal buffer """
+        """Delegate attribute retrieval to numpy instatiation of
+        internal buffer"""
         return getattr(self.to_numpy(), attr)
 
     def __add__(self, b):

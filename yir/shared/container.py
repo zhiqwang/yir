@@ -20,12 +20,11 @@ import libyir as lpx
 
 
 class StrContainer:
-
     def __init__(self, s):
         self._str_c = lpx.StrContainer(s)
 
     @classmethod
-    def from_lib(cls, _str_c: lpx.StrContainer) -> 'StrContainer':
+    def from_lib(cls, _str_c: lpx.StrContainer) -> "StrContainer":
         sc = StrContainer.__new__(cls)
         sc._str_c = _str_c
         return sc
@@ -53,12 +52,11 @@ class StrContainer:
 
 
 class BytesContainer(object):
-
     def __init__(self, b: bytes):
         self._bytes_c = lpx.BytesContainer(b)
 
     @classmethod
-    def from_lib(cls, _bytes_c: lpx.BytesContainer) -> 'BytesContainer':
+    def from_lib(cls, _bytes_c: lpx.BytesContainer) -> "BytesContainer":
         bc = BytesContainer.__new__(cls)
         bc._bytes_c = _bytes_c
         return bc

@@ -16,8 +16,8 @@
 Module for creating Layer objects
 """
 
-from typing import Callable, List
 import logging
+from typing import Callable, List
 
 from .layer import Layer
 
@@ -41,7 +41,7 @@ def __general_xfactory_func(xop_name, register_func):
 
         bottoms = [iX.name for iX in in_xlayers]
         d = register_func(attrs, in_xlayers)
-        shape = d['shape'][:]
+        shape = d["shape"][:]
         size = shape.get_size()  # abs(int(np.prod(shape)))
 
         X = Layer()
@@ -54,7 +54,8 @@ def __general_xfactory_func(xop_name, register_func):
             tops=[],
             bottoms=bottoms,
             attrs=attrs,
-            targets=[])
+            targets=[],
+        )
 
         return X
 
@@ -63,17 +64,17 @@ def __general_xfactory_func(xop_name, register_func):
 
 def xop_register(xop_name):
     # type: (str) -> Callable
-    """ Return decorator for registering factory function under
-        provided name """
+    """Return decorator for registering factory function under
+    provided name"""
 
     def xop_register_decorator(register_func):
         # type: (Callable) -> None
         if xop_name in XLAYER_FACTORY:
-            raise ValueError("Can't register factory function for operation:"
-                             " {} as the function has already been registered."
-                             .format(xop_name))
-        XLAYER_FACTORY[xop_name] = \
-            __general_xfactory_func(xop_name, register_func)
+            raise ValueError(
+                "Can't register factory function for operation:"
+                " {} as the function has already been registered.".format(xop_name)
+            )
+        XLAYER_FACTORY[xop_name] = __general_xfactory_func(xop_name, register_func)
 
         return __general_xfactory_func(xop_name, register_func)
 
@@ -82,15 +83,16 @@ def xop_register(xop_name):
 
 def xop_register_factory(xop_name):
     # type: (str) -> Callable
-    """ Return decorator for registering flexible factory function under
-        provided name """
+    """Return decorator for registering flexible factory function under
+    provided name"""
 
     def xop_register_factory_decorator(factory_func):
         # type: (Callable) -> None
         if xop_name in XLAYER_FACTORY:
-            raise ValueError("Can't register factory function for operation:"
-                             " {} as the function has already been registered."
-                             .format(xop_name))
+            raise ValueError(
+                "Can't register factory function for operation:"
+                " {} as the function has already been registered.".format(xop_name)
+            )
         XLAYER_FACTORY[xop_name] = factory_func
 
         return factory_func
@@ -100,14 +102,13 @@ def xop_register_factory(xop_name):
 
 def get_xop_factory_func(xop_name, internal=False):
     # type: (str, bool) -> function
-    """ Return a wrapper around the factory function for the specified
-        XOp name. The wrapper adjusts the 'internal' attribute of the
-        Layer which specifies whether the layer is an original imported
-        layer or an internally added one. """
+    """Return a wrapper around the factory function for the specified
+    XOp name. The wrapper adjusts the 'internal' attribute of the
+    Layer which specifies whether the layer is an original imported
+    layer or an internally added one."""
 
     if xop_name not in XLAYER_FACTORY:
-        raise ValueError("The provided operation: {} is not supported"
-                         .format(xop_name))
+        raise ValueError("The provided operation: {} is not supported".format(xop_name))
 
     def factory_wrapper(*args, **kwargs):
         X = XLAYER_FACTORY[xop_name](*args, **kwargs)

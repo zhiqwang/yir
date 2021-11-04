@@ -16,8 +16,8 @@
 Module for handling quantization parameters
 """
 
-import os
 import json
+import os
 
 
 class QuantParams:
@@ -45,7 +45,7 @@ class QuantParams:
     def empty(self):
         # type: () -> bool
         if len(self.network) == 0:
-            assert(not self.quant_params)
+            assert not self.quant_params
             return True
         return False
 
@@ -56,12 +56,13 @@ class QuantParams:
         """
         if key in self.quant_params:
             return key
-        if key + '_QUANT_UTIL' in self.quant_params:
-            return key + '_QUANT_UTIL'
+        if key + "_QUANT_UTIL" in self.quant_params:
+            return key + "_QUANT_UTIL"
         else:
-            raise ValueError("Provided key: {} does not exist as the key of a"
-                             " quantization parameter specification."
-                             .format(key))
+            raise ValueError(
+                "Provided key: {} does not exist as the key of a"
+                " quantization parameter specification.".format(key)
+            )
 
     def __getitem__(self, key):
         # type: (str) -> dict
@@ -70,8 +71,10 @@ class QuantParams:
     def __setitem__(self, key, value):
         # type: (str, dict) -> None
         if not isinstance(value, dict):
-            raise ValueError("Provided quantization parameters should be of"
-                             " type: `dict`, but is: `{}`".format(type(value)))
+            raise ValueError(
+                "Provided quantization parameters should be of"
+                " type: `dict`, but is: `{}`".format(type(value))
+            )
 
         self.quant_params[self._get_internal_key(key)] = value
 
@@ -80,18 +83,21 @@ class QuantParams:
 
         # quant_util_key used for maxpool because otherwise it messes with the
         #   FPGA quant params
-        quant_util_key = key + '_QUANT_UTIL'
+        quant_util_key = key + "_QUANT_UTIL"
         return key in self.quant_params or quant_util_key in self.quant_params
 
     def append(self, name, value):
         # type: (str, dict) -> None
         if not isinstance(value, dict):
-            raise ValueError("Provided quantization parameters should be of"
-                             " type: `dict`, but is: `{}`".format(type(value)))
+            raise ValueError(
+                "Provided quantization parameters should be of"
+                " type: `dict`, but is: `{}`".format(type(value))
+            )
         if name in self:
-            raise ValueError("Could not append new quantization parameter with"
-                             " name: {} because this key already exists"
-                             .format(name))
+            raise ValueError(
+                "Could not append new quantization parameter with"
+                " name: {} because this key already exists".format(name)
+            )
 
         self.network.append(name)
         self.quant_params[name] = value
@@ -99,16 +105,20 @@ class QuantParams:
     def insert(self, name, value, after):
         # type: (str, dict, str) -> None
         if not isinstance(value, dict):
-            raise ValueError("Provided quantization parameters should be of"
-                             " type: `dict`, but is: `{}`".format(type(value)))
+            raise ValueError(
+                "Provided quantization parameters should be of"
+                " type: `dict`, but is: `{}`".format(type(value))
+            )
         if after not in self:
-            raise ValueError("Could not insert a new quantization parameter"
-                             " after {} because this key does not exist"
-                             .format(after))
+            raise ValueError(
+                "Could not insert a new quantization parameter"
+                " after {} because this key does not exist".format(after)
+            )
         if name in self:
-            raise ValueError("Could not insert new quantization parameter with"
-                             " name: {} because this key already exists"
-                             .format(name))
+            raise ValueError(
+                "Could not insert new quantization parameter with"
+                " name: {} because this key already exists".format(name)
+            )
 
         after_idx = self.network.index(self._get_internal_key(after))
         self.network.insert(after_idx + 1, name)
@@ -117,25 +127,30 @@ class QuantParams:
     def insert_with_replace(self, name, value, after):
         # type: (str, dict, str) -> None
         if not isinstance(value, dict):
-            raise ValueError("Provided quantization parameters should be of"
-                             " type: `dict`, but is: `{}`".format(type(value)))
+            raise ValueError(
+                "Provided quantization parameters should be of"
+                " type: `dict`, but is: `{}`".format(type(value))
+            )
         if after not in self:
-            raise ValueError("Could not insert a new quantization parameter"
-                             " after {} because this key does not exist"
-                             .format(after))
+            raise ValueError(
+                "Could not insert a new quantization parameter"
+                " after {} because this key does not exist".format(after)
+            )
         if name in self:
             index = self.network.index(self._get_internal_key(name))
             after_idx = self.network.index(self._get_internal_key(after))
             if index <= after_idx:
-                raise ValueError("Can't do insertion with replacement."
-                                 " Replacement is only valid when"
-                                 " index of element to be replaced is on the"
-                                 " correct place in the sequence (behind the"
-                                 " element after which the insertion should"
-                                 " happen), but found indexes: {} and {} for"
-                                 " respectively index of element to replaced"
-                                 " and index of element after which it should"
-                                 " be inserted.".format(index, after_idx+1))
+                raise ValueError(
+                    "Can't do insertion with replacement."
+                    " Replacement is only valid when"
+                    " index of element to be replaced is on the"
+                    " correct place in the sequence (behind the"
+                    " element after which the insertion should"
+                    " happen), but found indexes: {} and {} for"
+                    " respectively index of element to replaced"
+                    " and index of element after which it should"
+                    " be inserted.".format(index, after_idx + 1)
+                )
             self.quant_params[self._get_internal_key(name)] = value
         else:
             self.insert(name, value, after)
@@ -152,9 +167,10 @@ class QuantParams:
             return None
 
         if not os.path.isfile(quantizecfg):
-            raise ValueError("Provided quantization file: {} for xfdnn"
-                             "execution graph does not exist"
-                             .format(quantizecfg))
+            raise ValueError(
+                "Provided quantization file: {} for xfdnn"
+                "execution graph does not exist".format(quantizecfg)
+            )
 
         with open(quantizecfg) as quant_json_file:
             quant_params_d = json.load(quant_json_file)
@@ -178,12 +194,14 @@ class QuantParams:
 
         for qp in quant_params_lst:
             # Keep track of the topological sequence
-            if qp['name'] in ['network']:
-                raise ValueError("Operation names: `network` are used"
-                                 " internally and should not be used for"
-                                 " naming operations at this moment")
-            network.append(qp['name'])
-            quant_params[qp['name']] = qp
+            if qp["name"] in ["network"]:
+                raise ValueError(
+                    "Operation names: `network` are used"
+                    " internally and should not be used for"
+                    " naming operations at this moment"
+                )
+            network.append(qp["name"])
+            quant_params[qp["name"]] = qp
 
         self.network = network
         self.quant_params = quant_params
@@ -193,15 +211,16 @@ class QuantParams:
         """
         Save the quantization parameters to json
         """
-        if not quantfile.endswith('.json'):
-            raise ValueError("Invalid quantization filename provided for"
-                             " storing quantization parameters. The file"
-                             " should be of type `json` but was: {}"
-                             .format(quantfile.split('.')[-1]))
+        if not quantfile.endswith(".json"):
+            raise ValueError(
+                "Invalid quantization filename provided for"
+                " storing quantization parameters. The file"
+                " should be of type `json` but was: {}".format(quantfile.split(".")[-1])
+            )
 
-        d = {'network': []}
+        d = {"network": []}
         for name in self.network:
-            d['network'].append(self.quant_params[name])
+            d["network"].append(self.quant_params[name])
 
         # Create directory if not exists
         dir_name = os.path.dirname(quantfile)
@@ -210,5 +229,5 @@ class QuantParams:
         except FileExistsError:
             pass
 
-        with open(quantfile, 'w') as f:
+        with open(quantfile, "w") as f:
             json.dump(d, f, indent=4, sort_keys=True)

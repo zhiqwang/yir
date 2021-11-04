@@ -19,5 +19,5 @@ Module for shape data structures and utilities
 """
 
 from .tensor_shape import TensorShape
-from .tuple_shape import TupleShape
 from .tools import get_numpy_broadcasted_shape
+from .tuple_shape import TupleShape

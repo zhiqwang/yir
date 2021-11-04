@@ -19,13 +19,11 @@ Module for Attrs wrapper definition
 import json
 
 import libyir as lpx
-
 from yir.shared.hash_map import HashMap, MapStrStr, MapStrVectorStr
 from yir.shared.vector import Vector, StrVector, IntVector, FloatVector, IntVector2D
 
 
 class AttrDict:
-
     def __init__(self, xattr_map: lpx.AttrMap):
         self._xattr_map = xattr_map
 
@@ -76,27 +74,27 @@ class AttrDict:
         """
         _xattr = self._xattr_map[key]
         assert _xattr.name == key
-        if _xattr.type == 'UNDEFINED':
+        if _xattr.type == "UNDEFINED":
             return None
-        elif _xattr.type == 'BOOL':
+        elif _xattr.type == "BOOL":
             return _xattr.b
-        elif _xattr.type == 'INT':
+        elif _xattr.type == "INT":
             return _xattr.i
-        elif _xattr.type == 'INTS':
+        elif _xattr.type == "INTS":
             return IntVector(_xattr.ints)
-        elif _xattr.type == 'INTS2D':
+        elif _xattr.type == "INTS2D":
             return IntVector2D(_xattr.ints2d)
-        elif _xattr.type == 'FLOAT':
+        elif _xattr.type == "FLOAT":
             return _xattr.f
-        elif _xattr.type == 'FLOATS':
+        elif _xattr.type == "FLOATS":
             return FloatVector(_xattr.floats)
-        elif _xattr.type == 'STRING':
+        elif _xattr.type == "STRING":
             return _xattr.s
-        elif _xattr.type == 'STRINGS':
+        elif _xattr.type == "STRINGS":
             return StrVector(_xattr.strings)
-        elif _xattr.type == 'MAP_STR_STR':
+        elif _xattr.type == "MAP_STR_STR":
             return MapStrStr(_xattr.map_str_str)
-        elif _xattr.type == 'MAP_STR_VSTR':
+        elif _xattr.type == "MAP_STR_VSTR":
             return MapStrVectorStr(_xattr.map_str_vstr)
         else:
             raise NotImplementedError(f"Unsupported attribute: {_xattr} of type: {_xattr.type}")
@@ -107,23 +105,23 @@ class AttrDict:
         """
         _xattr = self._xattr_map[key]
         assert _xattr.name == key
-        if _xattr.type == 'UNDEFINED':
+        if _xattr.type == "UNDEFINED":
             return None
-        elif _xattr.type in ['INT', 'FLOAT', 'BOOL']:
+        elif _xattr.type in ["INT", "FLOAT", "BOOL"]:
             return self.__getitem__(key)
-        elif _xattr.type == 'INTS':
+        elif _xattr.type == "INTS":
             return [i for i in _xattr.ints]
-        elif _xattr.type == 'INTS2D':
+        elif _xattr.type == "INTS2D":
             return [[ii for ii in i] for i in _xattr.ints2d]
-        elif _xattr.type == 'FLOATS':
+        elif _xattr.type == "FLOATS":
             return [f for f in _xattr.floats]
-        elif _xattr.type == 'STRING':
+        elif _xattr.type == "STRING":
             return str(_xattr.s)
-        elif _xattr.type == 'STRINGS':
+        elif _xattr.type == "STRINGS":
             return [s for s in _xattr.strings]
-        elif _xattr.type == 'MAP_STR_STR':
+        elif _xattr.type == "MAP_STR_STR":
             return MapStrStr(_xattr.map_str_str).to_dict()
-        elif _xattr.type == 'MAP_STR_VSTR':
+        elif _xattr.type == "MAP_STR_VSTR":
             return MapStrVectorStr(_xattr.map_str_vstr).to_dict()
         else:
             raise NotImplementedError(f"Unsupported attribute: {_xattr} of type: {_xattr.type}")
@@ -152,11 +150,12 @@ class AttrDict:
         raise NotImplementedError()
 
     def __setitem__(self, key: str, value):
-        value_error = "Unsupported value: {} for attribute: {}. XAttr values"\
-                      " can only be of types: int, float, str, List[int],"\
-                      " List[float], List[str], List[List[int]],"\
-                      " Dict[str, str], Dict[Str, List[Str]]"\
-                      .format(value, key)
+        value_error = (
+            "Unsupported value: {} for attribute: {}. XAttr values"
+            " can only be of types: int, float, str, List[int],"
+            " List[float], List[str], List[List[int]],"
+            " Dict[str, str], Dict[Str, List[Str]]".format(value, key)
+        )
         # TODO: improve this code
         if isinstance(value, list):
             if all([isinstance(e, int) for e in value]):
@@ -183,12 +182,11 @@ class AttrDict:
 
         elif isinstance(value, (MapStrVectorStr, MapStrStr)):
             value = value.get_lpx_map()
-        elif isinstance(value, (StrVector, IntVector, IntVector2D,
-                                FloatVector)):
+        elif isinstance(value, (StrVector, IntVector, IntVector2D, FloatVector)):
             value = value.get_lpx_vector()
-        elif value is not None and \
-            not isinstance(value, (float, int, str, StrVector, IntVector,
-                                   IntVector2D, FloatVector)):
+        elif value is not None and not isinstance(
+            value, (float, int, str, StrVector, IntVector, IntVector2D, FloatVector)
+        ):
             raise ValueError(value_error)
 
         if value is not None:
@@ -221,4 +219,3 @@ class AttrDict:
 
     def __repr__(self):
         return str(json.dumps(self.to_dict()))
-

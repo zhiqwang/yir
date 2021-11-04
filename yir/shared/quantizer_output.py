@@ -18,8 +18,7 @@ Data structure for quantizer output
 
 
 class QuantizerOutputElem:
-
-    def __init__(self, q_key: str,  orig_pb: str, q_eval: str = ''):
+    def __init__(self, q_key: str, orig_pb: str, q_eval: str = ""):
         self.q_key = q_key
         self.orig_pb = orig_pb
         self.q_eval = q_eval
@@ -50,7 +49,6 @@ class QuantizerOutputElem:
 
 
 class QuantizerOutput:
-
     def __init__(self, name):
         self.name = name
         self.data = {}

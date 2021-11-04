@@ -16,5 +16,5 @@
 Module for shared data structures and utility functions
 """
 
-from .quant_params import QuantParams
 from .quant_param_factory import QuantParamFactory, LayerParams
+from .quant_params import QuantParams

@@ -17,12 +17,11 @@ Module for Layer definition
 """
 
 import json
-import numpy as np
-import yir as px
-import libyir as lpx
-
 from collections import namedtuple
 
+import libyir as lpx
+import numpy as np
+import yir as px
 from yir.shapes import TensorShape, TupleShape
 from yir.shared.vector import StrVector, IntVector, IntVector2D
 
@@ -30,17 +29,16 @@ from .attr_dict import AttrDict
 
 
 # Convolution Data: WX + B
-ConvData = namedtuple("ConvData",  ['weights', 'biases'])
+ConvData = namedtuple("ConvData", ["weights", "biases"])
 
 # Scale Data: gamma*X + beta
-ScaleData = namedtuple("ScaleData", ['gamma', 'beta'])
+ScaleData = namedtuple("ScaleData", ["gamma", "beta"])
 
 # Batch Norm Data: gamma*(X-mu)/\sqrt(sigma_square+epsilon) + beta
-BatchData = namedtuple("BatchData", ['mu', 'sigma_square', 'gamma', 'beta'])
+BatchData = namedtuple("BatchData", ["mu", "sigma_square", "gamma", "beta"])
 
 
 class Layer:
-
     @classmethod
     def _from_xlayer(cls, _xlayer):
         X = Layer()
@@ -57,8 +55,8 @@ class Layer:
         self.shapes = []
 
         # Default
-        if 'target' not in kwargs:
-            kwargs['target'] = 'cpu'
+        if "target" not in kwargs:
+            kwargs["target"] = "cpu"
 
         self._set(*args, **kwargs)
 
@@ -89,14 +87,13 @@ class Layer:
             tops=[t for t in self.tops],
             bottoms=[b for b in self.bottoms],
             layer=[l for l in self.layer],
-            data=[d for d in self.data] if isinstance(self.data, list)
-            else self.data._replace(),  # TODO
+            data=[d for d in self.data] if isinstance(self.data, list) else self.data._replace(),  # TODO
             targets=[t for t in self.targets],
             target=self.target,
             subgraph=self.subgraph,
             subgraph_data=self.subgraph_data,
             internal=self.internal,
-            attrs=self.attrs.copy()
+            attrs=self.attrs.copy(),
         )
         return new_X
 
@@ -109,21 +106,23 @@ class Layer:
         return x_copy
 
     def __eq__(self, other):
-        return isinstance(other, Layer) and\
-            self.name == other.name and\
-            self.type == other.type and\
-            self.shapes == other.shapes and\
-            self.sizes == other.sizes and\
-            self.tops == other.tops and\
-            self.bottoms == other.bottoms and\
-            self.layer == other.layer and\
-            self.data == other.data and\
-            self.targets == other.targets and\
-            self.target == other.target and\
-            self.subgraph == other.subgraph and\
-            self.subgraph_data == other.subgraph_data and\
-            self.internal == other.internal and\
-            self.attrs == other.attrs
+        return (
+            isinstance(other, Layer)
+            and self.name == other.name
+            and self.type == other.type
+            and self.shapes == other.shapes
+            and self.sizes == other.sizes
+            and self.tops == other.tops
+            and self.bottoms == other.bottoms
+            and self.layer == other.layer
+            and self.data == other.data
+            and self.targets == other.targets
+            and self.target == other.target
+            and self.subgraph == other.subgraph
+            and self.subgraph_data == other.subgraph_data
+            and self.internal == other.internal
+            and self.attrs == other.attrs
+        )
 
     @property
     def name(self):
@@ -146,32 +145,28 @@ class Layer:
     def shapes(self):
         _shapes = self._xlayer.shapes
         _shapes_t = self._xlayer.shapes_t
-        if _shapes_t == 'TensorShape' and len(_shapes) != 1:
-            raise ValueError("TensorShape can only be one dimensional"
-                             " but got: {}".format(len(_shapes)))
+        if _shapes_t == "TensorShape" and len(_shapes) != 1:
+            raise ValueError("TensorShape can only be one dimensional" " but got: {}".format(len(_shapes)))
 
-        if _shapes_t == 'TensorShape':
+        if _shapes_t == "TensorShape":
             return TensorShape(IntVector(_shapes[0]))
-        elif _shapes_t == 'TupleShape':
+        elif _shapes_t == "TupleShape":
             return TupleShape(IntVector2D(_shapes))
         else:
-            raise ValueError("Unsupported shapes type: {}, should be"
-                             " TensorShape or TupleShape"
-                             .format(_shapes_t))
+            raise ValueError(
+                "Unsupported shapes type: {}, should be" " TensorShape or TupleShape".format(_shapes_t)
+            )
 
     @shapes.setter
     def shapes(self, shapes_):
-        if isinstance(shapes_, TensorShape)\
-                or (isinstance(shapes_, list) and
-                    (len(shapes_) == 0
-                     or isinstance(shapes_[0], int))):
-            self._xlayer.shapes = \
-                lpx.IntVector2D([lpx.IntVector(shapes_)])
+        if isinstance(shapes_, TensorShape) or (
+            isinstance(shapes_, list) and (len(shapes_) == 0 or isinstance(shapes_[0], int))
+        ):
+            self._xlayer.shapes = lpx.IntVector2D([lpx.IntVector(shapes_)])
             self._xlayer.shapes_t = "TensorShape"
         else:
             assert all([isinstance(e, (list, TensorShape)) for e in shapes_])
-            self._xlayer.shapes = \
-                lpx.IntVector2D([lpx.IntVector(s) for s in shapes_])
+            self._xlayer.shapes = lpx.IntVector2D([lpx.IntVector(s) for s in shapes_])
             self._xlayer.shapes_t = "TupleShape"
 
     @property
@@ -211,14 +206,14 @@ class Layer:
         # TODO: list??
         # TODO: remove op specific if else
         _data = [np.array(d, copy=False) for d in self._xlayer.data]
-        if len(self.type) > 0 and self.type[0] in \
-                ['Convolution', 'Conv2DTranspose', 'Dense']:
-            assert len(_data) == 2, "{} layer should have data"\
-                " attribute of size 2 but got: {}".format(self.type[0], len(_data))
+        if len(self.type) > 0 and self.type[0] in ["Convolution", "Conv2DTranspose", "Dense"]:
+            assert len(_data) == 2, "{} layer should have data" " attribute of size 2 but got: {}".format(
+                self.type[0], len(_data)
+            )
             return ConvData(*_data)
-        elif 'Scale' in self.type:
+        elif "Scale" in self.type:
             return ScaleData(*_data)
-        elif 'BatchNorm' in self.type:
+        elif "BatchNorm" in self.type:
             return BatchData(*_data)
         else:
             return _data
@@ -247,19 +242,19 @@ class Layer:
 
     @property
     def target(self):
-        return self._xlayer.target if self._xlayer.target != '' else None
+        return self._xlayer.target if self._xlayer.target != "" else None
 
     @target.setter
     def target(self, target_: str):
-        self._xlayer.target = target_ if target_ is not None else ''
+        self._xlayer.target = target_ if target_ is not None else ""
 
     @property
     def subgraph(self):
-        return self._xlayer.subgraph if self._xlayer.subgraph != '' else None
+        return self._xlayer.subgraph if self._xlayer.subgraph != "" else None
 
     @subgraph.setter
     def subgraph(self, subgraph_: str):
-        self._xlayer.subgraph = subgraph_ if subgraph_ is not None else ''
+        self._xlayer.subgraph = subgraph_ if subgraph_ is not None else ""
 
     @property
     def subgraph_data(self):
@@ -269,10 +264,9 @@ class Layer:
 
     @subgraph_data.setter
     def subgraph_data(self, subgraph_data_: list):
-        self._xlayer.subgraph_data = \
-            [(X._get_xlayer() if isinstance(X, Layer)
-              else Layer(**X)._get_xlayer())
-             for X in subgraph_data_]
+        self._xlayer.subgraph_data = [
+            (X._get_xlayer() if isinstance(X, Layer) else Layer(**X)._get_xlayer()) for X in subgraph_data_
+        ]
 
     @property
     def internal(self):
@@ -302,28 +296,22 @@ class Layer:
 
     def to_dict(self, data=False):
         return {
-            'name': self.name,
-            'type': [t for t in self.type],
-            'shapes': self.shapes.tolist(),
-            'sizes': [s for s in self.sizes],
-            'tops': [t for t in self.tops],
-            'bottoms': [b for b in self.bottoms],
-            'layer': [l for l in self.layer],
-            'data': [] if not data else self.data,
-            'targets': [t for t in self.targets],
-            'target': self.target,
-            'subgraph': self.subgraph,
-            'subgraph_data': [sd.to_dict(data) for sd in self.subgraph_data],
-            'internal': self.internal,
-            'attrs': self.attrs.to_dict()
+            "name": self.name,
+            "type": [t for t in self.type],
+            "shapes": self.shapes.tolist(),
+            "sizes": [s for s in self.sizes],
+            "tops": [t for t in self.tops],
+            "bottoms": [b for b in self.bottoms],
+            "layer": [l for l in self.layer],
+            "data": [] if not data else self.data,
+            "targets": [t for t in self.targets],
+            "target": self.target,
+            "subgraph": self.subgraph,
+            "subgraph_data": [sd.to_dict(data) for sd in self.subgraph_data],
+            "internal": self.internal,
+            "attrs": self.attrs.to_dict(),
         }
 
 
 def defaultLayer():
-    return Layer(
-        layer=[],
-        tops=[],
-        bottoms=[],
-        targets=[],
-        target='cpu'
-    )
+    return Layer(layer=[], tops=[], bottoms=[], targets=[], target="cpu")

@@ -16,22 +16,22 @@
 Module for shared TensorShape data structure
 """
 
-import numpy as np
-
 from collections import UserList
+
+import numpy as np
 
 
 class TensorShape(UserList):
-
     def __init__(self, lst):
         if not all([isinstance(e, (int, type(None))) for e in lst]):
-            raise ValueError("Invalid tensor shape, expecting list of integers"
-                             " or None, but got: {}".format(lst))
+            raise ValueError(
+                "Invalid tensor shape, expecting list of integers" " or None, but got: {}".format(lst)
+            )
 
         self.data = lst
 
     def __getitem__(self, key):
-        """ Override slice to return a TensorShape """
+        """Override slice to return a TensorShape"""
         if isinstance(key, slice):
             return TensorShape(self.data[key])
         return self.data[key]
@@ -44,10 +44,11 @@ class TensorShape(UserList):
         return TensorShape([dim if dim != i else new_i for dim in self.data])
 
     def set_value(self, axis, value):
-        """ Set element at provided axis to 'value' """
+        """Set element at provided axis to 'value'"""
         if not isinstance(value, int):
-            raise ValueError("Shape values should be integers but got: {} of "
-                             " type: {}".format(value, type(value)))
+            raise ValueError(
+                "Shape values should be integers but got: {} of " " type: {}".format(value, type(value))
+            )
         self.data[axis] = value
 
     def tolist(self):

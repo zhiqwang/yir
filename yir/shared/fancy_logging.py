@@ -25,16 +25,18 @@ def getLogger(name):
 
 
 class FancyLogger:
-
     def __init__(self, logger):
         self.logger = logger
 
     def banner(self, message):
         # logger = logging.getLogger(logger)
 
-        banner = \
-            "\n**************************************************\n" +\
-            "* " + message + "\n" +\
-            "**************************************************"
+        banner = (
+            "\n**************************************************\n"
+            + "* "
+            + message
+            + "\n"
+            + "**************************************************"
+        )
 
         self.logger.info(banner)

@@ -17,18 +17,20 @@ Module for Graph data structure
 """
 
 import copy
-from typing import Dict, List
 import logging
 import warnings
-import libyir as lpx
+from typing import Dict, List
 
-from .layer.layer import Layer
-from .layer.attr_dict import AttrDict
-# from yir.target_registry import TargetRegistry
-from yir.shared.vector import StrVector
+import libyir as lpx
 from yir.shared.quantizer_output import QuantizerOutput
 
-logger = logging.getLogger('yir')
+# from yir.target_registry import TargetRegistry
+from yir.shared.vector import StrVector
+
+from .layer.attr_dict import AttrDict
+from .layer.layer import Layer
+
+logger = logging.getLogger("yir")
 
 
 class Graph:
@@ -52,14 +54,13 @@ class Graph:
         xg.init()
         return xg
 
-    def __init__(self, name='Graph'):
+    def __init__(self, name="Graph"):
         self._xgraph = lpx.Graph(name)
         self.init()
 
     def init(self):
         # color map
-        self.cm = ("#8dd3c7", "#fb8072", "#ffffb3", "#bebada", "#80b1d3",
-                   "#fdb462", "#b3de69", "#fccde5")
+        self.cm = ("#8dd3c7", "#fb8072", "#ffffb3", "#bebada", "#80b1d3", "#fdb462", "#b3de69", "#fccde5")
 
         # Quantization
         self.quantizer_output = None
@@ -182,8 +183,7 @@ class Graph:
         # TODO: topological assumption here??
 
         if not isinstance(X, Layer):
-            raise ValueError("xlayer argument should be of type: Layer but"
-                             " was: {}".format(type(X)))
+            raise ValueError("xlayer argument should be of type: Layer but" " was: {}".format(type(X)))
 
         # xlayer      = X._get_xlayer()
         # xlayer.name = px.stringify(xlayer.name)
@@ -192,7 +192,6 @@ class Graph:
         # for i in range(len(xlayer.tops)):
         #     xlayer.tops[i] = px.stringify(xlayer.tops[i])
         self._xgraph.add(X._get_xlayer())
-
 
         # Setup targets
         X = self.get(X.name)
@@ -208,19 +207,20 @@ class Graph:
 
     def insert(self, X: Layer) -> None:
         """Insert the provided Layer object in the graph between
-            two other layers"""
+        two other layers"""
 
         if len(X.bottoms) != 1 or len(X.tops) != 1:
-            raise ValueError("Undefined behaviour: can't insert a node if"
-                             " there are multiple bottom layers or multiple"
-                             " top layers")
+            raise ValueError(
+                "Undefined behaviour: can't insert a node if"
+                " there are multiple bottom layers or multiple"
+                " top layers"
+            )
 
         bX = self.get(X.bottoms[0])
         tX = self.get(X.tops[0])
 
         new_tops = [(bXt if bXt != tX.name else X.name) for bXt in bX.tops]
-        new_bottoms = [(tXb if tXb != bX.name else X.name)
-                       for tXb in tX.bottoms]
+        new_bottoms = [(tXb if tXb != bX.name else X.name) for tXb in tX.bottoms]
 
         self.add(X)
 
@@ -271,18 +271,16 @@ class Graph:
         top_Xs = [self.get(t) for t in tops]
 
         for bX in bottom_Xs:
-            new_tops = [([bXt] if bXt != layer_name else
-                         [tX.name for tX in top_Xs])
-                        for bXt in bX.tops]
+            new_tops = [([bXt] if bXt != layer_name else [tX.name for tX in top_Xs]) for bXt in bX.tops]
 
             # Flatten
             new_tops = [e for sl in new_tops for e in sl]
             bX.tops = new_tops
 
         for tX in top_Xs:
-            new_bottoms = [([tXb] if tXb != layer_name else
-                            [bX.name for bX in bottom_Xs])
-                           for tXb in tX.bottoms]
+            new_bottoms = [
+                ([tXb] if tXb != layer_name else [bX.name for bX in bottom_Xs]) for tXb in tX.bottoms
+            ]
 
             # Flatten
             new_bottoms = [e for sl in new_bottoms for e in sl]
@@ -315,18 +313,18 @@ class Graph:
         """
         Return the names of all the subgraphs
         """
-        return list(set(
-            [X.subgraph for X in self.get_layers() if X.subgraph is not None]
-        ))
+        return list(set([X.subgraph for X in self.get_layers() if X.subgraph is not None]))
 
     ################
     # QUANTIZATION #
     ################
 
     def is_quantized(self) -> bool:
-        return self.quantizer_output is not None or\
-            "is_quantized" in self.meta_attrs and \
-            self.meta_attrs["is_quantized"]
+        return (
+            self.quantizer_output is not None
+            or "is_quantized" in self.meta_attrs
+            and self.meta_attrs["is_quantized"]
+        )
 
     def set_quantizer_output(self, q_output: QuantizerOutput) -> None:
         self.quantizer_output = q_output
@@ -338,14 +336,18 @@ class Graph:
         TODO: Merge approaches
         """
         if not self.is_quantized():
-            raise ValueError("No quantization output found. Quantize this"
-                             " Graph object before retrieving the"
-                             " quantization output")
+            raise ValueError(
+                "No quantization output found. Quantize this"
+                " Graph object before retrieving the"
+                " quantization output"
+            )
 
-        if (self.quantizer_output is not None and "is_quantized" in
-                self.meta_attrs and self.meta_attrs["is_quantized"]):
-            warnings.warn("Quantization info found both in Graph meta"
-                          " attributes and q_output attribute")
+        if (
+            self.quantizer_output is not None
+            and "is_quantized" in self.meta_attrs
+            and self.meta_attrs["is_quantized"]
+        ):
+            warnings.warn("Quantization info found both in Graph meta" " attributes and q_output attribute")
 
         if self.quantizer_output is not None:
             return self.quantizer_output
@@ -353,17 +355,15 @@ class Graph:
         # Retrieve quantization output from meta attributes
         q_output = QuantizerOutput(self.get_name())
         if "quant_keys" not in self.meta_attrs:
-            raise ValueError("Expected `quant_keys` attribute in meta"
-                             " attributes")
+            raise ValueError("Expected `quant_keys` attribute in meta" " attributes")
 
         for q_key in self.meta_attrs["quant_keys"]:
             q_output.add(
                 q_key=q_key,
-                orig_pb=self.meta_attrs[q_key]['orig_pb'],
-                q_eval=self.meta_attrs[q_key]['q_eval']
+                orig_pb=self.meta_attrs[q_key]["orig_pb"],
+                q_eval=self.meta_attrs[q_key]["q_eval"],
             )
-            logger.debug("QOutput q_info: {}"
-                         .format(self.meta_attrs[q_key]['q_eval']))
+            logger.debug("QOutput q_info: {}".format(self.meta_attrs[q_key]["q_eval"]))
 
         return q_output
 
@@ -373,14 +373,14 @@ class Graph:
         for X in self.get_layers():
             if "vai_quant" in X.attrs:
                 line = [str(idx), X.name]
-                for quant_elem in X.attrs['vai_quant']:
+                for quant_elem in X.attrs["vai_quant"]:
                     line.extend([str(i) for i in X.attrs[quant_elem]])
                 lines.append(line)
                 idx += 1
 
-        s = '\n'.join([' '.join(line) for line in lines])
+        s = "\n".join([" ".join(line) for line in lines])
 
-        with open(filename, 'w') as f:
+        with open(filename, "w") as f:
             f.write(s)
 
     ###############
@@ -398,16 +398,18 @@ class Graph:
     def get_compiler_output(self):
         # type: () -> CompilerOutput
         if not self.is_compiled():
-            raise ValueError("No compilation output found. Compile this"
-                             " Graph object before retrieving the"
-                             " compilation output")
+            raise ValueError(
+                "No compilation output found. Compile this"
+                " Graph object before retrieving the"
+                " compilation output"
+            )
         return self.compiler_output
 
     ##################
     # HELPER METHODS #
     ##################
 
-    def copy_meta_attrs(self, other: 'Graph') -> None:
+    def copy_meta_attrs(self, other: "Graph") -> None:
         self.meta_attrs = other.meta_attrs.to_dict()
         self.quantizer_output = other.quantizer_output
         self.compiler_output = other.compiler_output
@@ -426,7 +428,7 @@ class Graph:
             xg.add(X_copy)
         return xg
 
-    def copy_from(self, xg: 'Graph'):
+    def copy_from(self, xg: "Graph"):
         self._xgraph.copy(xg._xgraph)
 
     def visualize(self, outputfile):
@@ -434,25 +436,28 @@ class Graph:
         Visualize this xgraph using pydot
         """
         try:
-            from . import pydot_tools
             import pydot
-        except ImportError:
-            raise ImportError("Graph functionality depends on the 'pydot'"
-                              " package. Please make sure that Pydot is"
-                              " installed before trying to visualize XGraphs")
 
-        pdg = pydot.Dot(self.get_name(), graph_type='digraph', rankdir='BT')
+            from . import pydot_tools
+        except ImportError:
+            raise ImportError(
+                "Graph functionality depends on the 'pydot'"
+                " package. Please make sure that Pydot is"
+                " installed before trying to visualize XGraphs"
+            )
+
+        pdg = pydot.Dot(self.get_name(), graph_type="digraph", rankdir="BT")
 
         cm_idx = 1
         target_to_cm = {}
         for X in self.get_layers():
             pydot_attrs = copy.copy(pydot_tools.LAYER_STYLE_DEFAULT)
 
-            if 'Input' in X.type:
+            if "Input" in X.type:
                 pydot_attrs["shape"] = "oval"
                 pydot_attrs["fillcolor"] = self.cm[0]
 
-            if X.target != 'cpu':
+            if X.target != "cpu":
                 if X.target not in target_to_cm:
                     target_to_cm[X.target] = cm_idx
                     if cm_idx < (len(self.cm) - 1):
@@ -461,17 +466,15 @@ class Graph:
 
             # Add '-pdg' to fix issues of pydot with names with format
             #   '[...]:0' where ':0' gets removed
-            node = pydot.Node(pydot.quote_if_necessary(X.name + '-pdg'),
-                              **pydot_attrs)
+            node = pydot.Node(pydot.quote_if_necessary(X.name + "-pdg"), **pydot_attrs)
 
             pdg.add_node(node)
 
             for b in X.bottoms:
-                src_nodes = pdg.get_node(pydot.quote_if_necessary(b + '-pdg'))
+                src_nodes = pdg.get_node(pydot.quote_if_necessary(b + "-pdg"))
 
                 if len(src_nodes) == 0:
-                    raise ValueError("Pydot could not find layer with name: {}"
-                                     .format(b))
+                    raise ValueError("Pydot could not find layer with name: {}".format(b))
                 assert len(src_nodes) == 1
 
                 src_node = src_nodes[0]

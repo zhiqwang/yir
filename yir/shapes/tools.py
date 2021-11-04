@@ -37,7 +37,8 @@ def get_numpy_broadcasted_shape(shape_a, shape_b):
             else:
                 reversed_shape.append(max(ls, rs))
         else:
-            raise ValueError("Invalid shapes for broadcasted additions:"
-                             " {} and {}".format(shape_a, shape_b))
+            raise ValueError(
+                "Invalid shapes for broadcasted additions:" " {} and {}".format(shape_a, shape_b)
+            )
 
     return list(reversed(reversed_shape))

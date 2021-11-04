@@ -20,11 +20,10 @@ import libyir as lpx
 
 
 class Vector:
-
     def __init__(self, vector):
         # self.__vector = vector -> doesn't work because of recursive
         # call to getattr(...)
-        self.__dict__['_Vector__vector'] = vector
+        self.__dict__["_Vector__vector"] = vector
 
     def __add__(self, other):
         self.extend(other)
@@ -41,14 +40,14 @@ class Vector:
 
     def __eq__(self, other):
         try:
-            return len(self) == len(other)\
-                and all((self.__getitem__(i) == other[i]
-                        for i in range(len(self))))
+            return len(self) == len(other) and all(
+                (self.__getitem__(i) == other[i] for i in range(len(self)))
+            )
         except TypeError:
             return False
 
     def __getattr__(self, attr):
-        """ Delegate access to implementation """
+        """Delegate access to implementation"""
         if attr in self.__dict__:
             return getattr(self, attr)
         return getattr(self.__vector, attr)
@@ -80,7 +79,7 @@ class Vector:
         return str(self.__vector)
 
     def __setattr__(self, attr, value):
-        """ Delegate access to implementation """
+        """Delegate access to implementation"""
         return setattr(self.__vector, attr, value)
 
     def __setitem__(self, key, value):
@@ -92,7 +91,7 @@ class Vector:
 
 class StrVector(Vector):
 
-    """ Wrapper class to make lpx.StrVector more python-like """
+    """Wrapper class to make lpx.StrVector more python-like"""
 
     def __setitem__(self, key, value):
         if isinstance(key, slice):
@@ -102,7 +101,7 @@ class StrVector(Vector):
 
 class IntVector(Vector):
 
-    """ Wrapper class to make lpx.IntVector more python-like """
+    """Wrapper class to make lpx.IntVector more python-like"""
 
     def __setitem__(self, key, value):
         if isinstance(key, slice):
@@ -112,7 +111,7 @@ class IntVector(Vector):
 
 class FloatVector(Vector):
 
-    """ Wrapper class to make lpx.FloatVector more python-like """
+    """Wrapper class to make lpx.FloatVector more python-like"""
 
     def __setitem__(self, key, value):
         if isinstance(key, slice):
@@ -122,7 +121,7 @@ class FloatVector(Vector):
 
 class XBufferVector(Vector):
 
-    """ Wrapper class to make lpx.XBufferVector more python-like """
+    """Wrapper class to make lpx.XBufferVector more python-like"""
 
     def __setitem__(self, key, value):
         if isinstance(key, slice):
@@ -131,47 +130,43 @@ class XBufferVector(Vector):
 
 
 def make_any_vector(elem_to_any_func, any_to_elem_func):
-
     class AnyVector(Vector):
 
-        """ Wrapper class to make lpx.Vector more python-like """
+        """Wrapper class to make lpx.Vector more python-like"""
 
         def append(self, value):
             self.get_lpx_vector().append(any_to_elem_func(value))
 
         def __getitem__(self, key):
             if isinstance(key, slice):
-                return [elem_to_any_func(e)
-                        for e in self.get_lpx_vector()[key]]
+                return [elem_to_any_func(e) for e in self.get_lpx_vector()[key]]
             return elem_to_any_func(self.get_lpx_vector()[key])
 
         def __setitem__(self, key, value):
             if isinstance(key, slice):
                 value = any_to_elem_func(value)
-            return self.get_lpx_vector().\
-                __setitem__(key, any_to_elem_func(value))
+            return self.get_lpx_vector().__setitem__(key, any_to_elem_func(value))
 
     return AnyVector
 
 
 class IntVector2D(Vector):
 
-    """ Wrapper class to make lpx.IntVector2D more python-like """
+    """Wrapper class to make lpx.IntVector2D more python-like"""
 
     def __init__(self, vector):
         # self.__vector = vector -> doesn't work because of recursive
         # call to getattr(...)
         # TODO: best approach?
-        self.__dict__['_IntVector2D__vector'] = vector
-        self.__dict__['_Vector__vector'] = vector
+        self.__dict__["_IntVector2D__vector"] = vector
+        self.__dict__["_Vector__vector"] = vector
 
     def append(self, value: list):
         self.__vector.append(lpx.IntVector(value))
 
     def __contains__(self, value: list):
         if not isinstance(value, list):
-            raise TypeError("Expecting 'list' argument but got: {}"
-                            .format(type(value)))
+            raise TypeError("Expecting 'list' argument but got: {}".format(type(value)))
         return lpx.IntVector(value) in self.__vector
 
     def insert(self, index: int, value):
@@ -181,7 +176,7 @@ class IntVector2D(Vector):
         self.__vector.extend([lpx.IntVector(v) for v in value])
 
     def __getattr__(self, attr):
-        """ Delegate access to implementation """
+        """Delegate access to implementation"""
         if attr in self.__dict__:
             return getattr(self, attr)
         return getattr(self.__vector, attr)
@@ -202,8 +197,7 @@ class IntVector2D(Vector):
         return str(self)
 
     def __str__(self):
-        return "IntVector2D[" + \
-            ', '.join([str(e) for e in self.__vector]) + ']'
+        return "IntVector2D[" + ", ".join([str(e) for e in self.__vector]) + "]"
 
     def to_list(self):
         return [[ii for ii in i] for i in self.get_lpx_vector()]

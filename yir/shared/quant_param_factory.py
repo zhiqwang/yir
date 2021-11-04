@@ -17,13 +17,14 @@ Module for creating, tracking and storing quantization parameters
 """
 
 import collections
-import numpy as np
 import logging
 
+import numpy as np
 from yir.graph.layer import layer
+
 from .quant_params import QuantParams
 
-logger = logging.getLogger('pyxir')
+logger = logging.getLogger("pyxir")
 
 
 class LayerParams(object):
@@ -75,12 +76,7 @@ class QuantParamFactory(object):
 
         self.quant_params = QuantParams()
 
-    def get_default_quant_params(self,
-                                 name,
-                                 bitwidth,
-                                 channels,
-                                 th_layer_in,
-                                 th_layer_out):
+    def get_default_quant_params(self, name, bitwidth, channels, th_layer_in, th_layer_out):
         # type:
         """
         TODO
@@ -91,8 +87,9 @@ class QuantParamFactory(object):
 
         # Scale and postscale shift for division
         multiplier = th_layer_in / th_layer_out
-        logger.info("th_layer_in: {}, th_layer_out: {}, ratio: {}"
-                    .format(th_layer_in, th_layer_out, multiplier))
+        logger.info(
+            "th_layer_in: {}, th_layer_out: {}, ratio: {}".format(th_layer_in, th_layer_out, multiplier)
+        )
 
         # TODO
         prescale_shift_max = 0
@@ -112,14 +109,11 @@ class QuantParamFactory(object):
         postscale_shift = np.clip(rshift, 0, postscale_shift_max)
         rshift -= postscale_shift
 
-        scale = np.clip(canonical_form * np.power(2, lshift - rshift), 0,
-                        np.power(2, scale_bitwidth - 1))
+        scale = np.clip(canonical_form * np.power(2, lshift - rshift), 0, np.power(2, scale_bitwidth - 1))
 
-        remaining_available_lshift = \
-            np.floor(np.log2(np.power(2, scale_bitwidth - 1) / scale))
+        remaining_available_lshift = np.floor(np.log2(np.power(2, scale_bitwidth - 1) / scale))
         remaining_available_rshift = postscale_shift_max - postscale_shift
-        remaining_available_shift = \
-            np.fmin(remaining_available_lshift, remaining_available_rshift)
+        remaining_available_shift = np.fmin(remaining_available_lshift, remaining_available_rshift)
 
         scale *= np.power(2, remaining_available_shift)
         postscale_shift += remaining_available_shift
@@ -132,12 +126,14 @@ class QuantParamFactory(object):
         scale = np.clip(scale, 0, np.power(2, scale_bitwidth) - 1)
         postscale_shift = np.clip(postscale_shift, 0, postscale_shift_max)
 
-        logger.info("prescale: {}, scale: {}, postscale: {}"
-                    .format(prescale_shift, scale, postscale_shift))
-        logger.info("Type: prescale: {}, scale: {}, postscale: {}"
-                    .format(type(prescale_shift.astype(np.int32)),
-                            type(scale.astype(np.int32)),
-                            type(postscale_shift.astype(np.int32))))
+        logger.info("prescale: {}, scale: {}, postscale: {}".format(prescale_shift, scale, postscale_shift))
+        logger.info(
+            "Type: prescale: {}, scale: {}, postscale: {}".format(
+                type(prescale_shift.astype(np.int32)),
+                type(scale.astype(np.int32)),
+                type(postscale_shift.astype(np.int32)),
+            )
+        )
 
         qp = {
             "name": name,
@@ -150,11 +146,9 @@ class QuantParamFactory(object):
             "sf_layer_in": sf_layer_in,  # unused by xfdnn
             "sf_layer_out": sf_layer_out,  # unused by xfdnn
             "sf_params": sf_params.tolist() * channels,
-            "prescale_shift":
-            [int(prescale_shift.astype(np.int32))] * channels,
+            "prescale_shift": [int(prescale_shift.astype(np.int32))] * channels,
             "scale": [int(scale.astype(np.int32))] * channels,
-            "postscale_shift":
-            [int(postscale_shift.astype(np.int32))] * channels
+            "postscale_shift": [int(postscale_shift.astype(np.int32))] * channels,
         }
         return qp
 
@@ -181,52 +175,54 @@ class QuantParamFactory(object):
 
         for (name, layer_type, layer_params) in quant_layers:
 
-            if layer_type in ['Concat']:
+            if layer_type in ["Concat"]:
                 bw_layer_in[name] = self.bw_layer_in[name]
                 bw_layer_out[name] = self.bw_layer_out[name]
 
-                sf_layer_in[name] = self.th_layer_in[name][0] /\
-                    (np.power(2.0, self.bw_layer_in[name] - 1) - 1)
-                sf_layer_out[name] = self.th_layer_out[name][0] /\
-                    (np.power(2.0, self.bw_layer_out[name] - 1) - 1)
+                sf_layer_in[name] = self.th_layer_in[name][0] / (
+                    np.power(2.0, self.bw_layer_in[name] - 1) - 1
+                )
+                sf_layer_out[name] = self.th_layer_out[name][0] / (
+                    np.power(2.0, self.bw_layer_out[name] - 1) - 1
+                )
 
-                multiplier = np.repeat(sf_layer_in[name] / sf_layer_out[name],
-                                       1)
+                multiplier = np.repeat(sf_layer_in[name] / sf_layer_out[name], 1)
 
                 prescale_shift[name] = np.zeros_like(multiplier)
                 scale[name] = np.ones_like(multiplier)
                 postscale_shift[name] = np.zeros_like(multiplier)
 
-                self.quant_params.append(name, {
-                    "name": name,
-                    "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
-                    "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
-                    "th_layer_in": self.th_layer_in[name][0].tolist(),
-                    "th_layer_out": self.th_layer_out[name][0].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_in": sf_layer_in[name].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_out": sf_layer_out[name].tolist(),
-                    "prescale_shift":
-                    prescale_shift[name].astype(int).tolist(),
-                    "scale": scale[name].astype(int).tolist(),
-                    "postscale_shift":
-                    postscale_shift[name].astype(int).tolist()
-                })
+                self.quant_params.append(
+                    name,
+                    {
+                        "name": name,
+                        "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
+                        "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
+                        "th_layer_in": self.th_layer_in[name][0].tolist(),
+                        "th_layer_out": self.th_layer_out[name][0].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_in": sf_layer_in[name].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_out": sf_layer_out[name].tolist(),
+                        "prescale_shift": prescale_shift[name].astype(int).tolist(),
+                        "scale": scale[name].astype(int).tolist(),
+                        "postscale_shift": postscale_shift[name].astype(int).tolist(),
+                    },
+                )
             if layer_type in ["Convolution"]:
                 bw_layer_in[name] = self.bw_layer_in[name]
                 bw_layer_out[name] = self.bw_layer_out[name]
                 bw_params[name] = self.bw_params[name]
 
-                sf_layer_in[name] = self.th_layer_in[name][0] /\
-                    (np.power(2.0, self.bw_layer_in[name] - 1) - 1)
-                sf_layer_out[name] = self.th_layer_out[name][0] /\
-                    (np.power(2.0, self.bw_layer_out[name] - 1) - 1)
-                sf_params[name] = self.th_params[name] /\
-                    (np.power(2.0, self.bw_params[name] - 1) - 1)
+                sf_layer_in[name] = self.th_layer_in[name][0] / (
+                    np.power(2.0, self.bw_layer_in[name] - 1) - 1
+                )
+                sf_layer_out[name] = self.th_layer_out[name][0] / (
+                    np.power(2.0, self.bw_layer_out[name] - 1) - 1
+                )
+                sf_params[name] = self.th_params[name] / (np.power(2.0, self.bw_params[name] - 1) - 1)
 
-                multiplier = np.repeat(sf_layer_in[name] * sf_params[name] /
-                                       sf_layer_out[name], 1)
+                multiplier = np.repeat(sf_layer_in[name] * sf_params[name] / sf_layer_out[name], 1)
 
                 prescale_shift[name] = np.zeros_like(multiplier)
                 scale[name] = np.ones_like(multiplier)
@@ -257,115 +253,105 @@ class QuantParamFactory(object):
                                 scale_bitwidth = 16
                                 postscale_shift_max = 24
 
-                        canonical_factor = \
-                            np.power(2, np.ceil(np.log2(multiplier[i])))
+                        canonical_factor = np.power(2, np.ceil(np.log2(multiplier[i])))
                         canonical_form = multiplier[i] / canonical_factor
 
                         shift = np.log2(canonical_factor)
                         lshift = np.clip(shift, 0, None)
                         rshift = -np.clip(shift, None, 0)
 
-                        prescale_shift[name][i] = \
-                            np.clip(rshift, 0, prescale_shift_max)
+                        prescale_shift[name][i] = np.clip(rshift, 0, prescale_shift_max)
                         rshift -= prescale_shift[name][i]
 
-                        postscale_shift[name][i] = \
-                            np.clip(rshift, 0, postscale_shift_max)
+                        postscale_shift[name][i] = np.clip(rshift, 0, postscale_shift_max)
                         rshift -= postscale_shift[name][i]
 
-                        scale[name][i] = \
-                            np.clip(canonical_form *
-                                    np.power(2, lshift - rshift),
-                                    0, np.power(2, scale_bitwidth - 1))
+                        scale[name][i] = np.clip(
+                            canonical_form * np.power(2, lshift - rshift), 0, np.power(2, scale_bitwidth - 1)
+                        )
 
-                        remaining_available_lshift = \
-                            np.floor(np.log2(np.power(2, scale_bitwidth - 1) /
-                                             scale[name][i]))
-                        remaining_available_rshift = \
-                            postscale_shift_max - postscale_shift[name][i]
-                        remaining_available_shift = \
-                            np.fmin(remaining_available_lshift,
-                                    remaining_available_rshift)
+                        remaining_available_lshift = np.floor(
+                            np.log2(np.power(2, scale_bitwidth - 1) / scale[name][i])
+                        )
+                        remaining_available_rshift = postscale_shift_max - postscale_shift[name][i]
+                        remaining_available_shift = np.fmin(
+                            remaining_available_lshift, remaining_available_rshift
+                        )
 
-                        scale[name][i] *= \
-                            np.power(2, remaining_available_shift)
+                        scale[name][i] *= np.power(2, remaining_available_shift)
                         postscale_shift[name][i] += remaining_available_shift
 
-                        prescale_shift[name][i] = \
-                            prescale_shift[name][i].astype(int)
+                        prescale_shift[name][i] = prescale_shift[name][i].astype(int)
                         scale[name][i] = np.round(scale[name][i]).astype(int)
-                        postscale_shift[name][i] = \
-                            postscale_shift[name][i].astype(int)
+                        postscale_shift[name][i] = postscale_shift[name][i].astype(int)
 
-                        prescale_shift[name][i] = \
-                            np.clip(prescale_shift[name][i], 0,
-                                    prescale_shift_max)
-                        scale[name][i] = \
-                            np.clip(scale[name][i], 0,
-                                    np.power(2, scale_bitwidth) - 1)
-                        postscale_shift[name][i] = \
-                            np.clip(postscale_shift[name][i], 0,
-                                    postscale_shift_max)
+                        prescale_shift[name][i] = np.clip(prescale_shift[name][i], 0, prescale_shift_max)
+                        scale[name][i] = np.clip(scale[name][i], 0, np.power(2, scale_bitwidth) - 1)
+                        postscale_shift[name][i] = np.clip(postscale_shift[name][i], 0, postscale_shift_max)
 
-                self.quant_params.append(name, {
-                    "name": name,
-                    "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
-                    "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
-                    "bw_params": self.bw_params[name],
-                    "th_layer_in": self.th_layer_in[name][0].tolist(),
-                    "th_layer_out": self.th_layer_out[name][0].tolist(),
-                    "th_params": self.th_params[name].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_in": sf_layer_in[name].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_out": sf_layer_out[name].tolist(),
-                    # unused by xfdnn
-                    "sf_params": sf_params[name].tolist(),
-                    "prescale_shift":
-                    prescale_shift[name].astype(int).tolist(),
-                    "scale": scale[name].astype(int).tolist(),
-                    "postscale_shift":
-                    postscale_shift[name].astype(int).tolist()
-                }
+                self.quant_params.append(
+                    name,
+                    {
+                        "name": name,
+                        "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
+                        "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
+                        "bw_params": self.bw_params[name],
+                        "th_layer_in": self.th_layer_in[name][0].tolist(),
+                        "th_layer_out": self.th_layer_out[name][0].tolist(),
+                        "th_params": self.th_params[name].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_in": sf_layer_in[name].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_out": sf_layer_out[name].tolist(),
+                        # unused by xfdnn
+                        "sf_params": sf_params[name].tolist(),
+                        "prescale_shift": prescale_shift[name].astype(int).tolist(),
+                        "scale": scale[name].astype(int).tolist(),
+                        "postscale_shift": postscale_shift[name].astype(int).tolist(),
+                    },
                 )
             elif layer_type in ["BatchNorm", "Scale"]:
                 bw_layer_in[name] = self.bw_layer_in[name]
                 bw_layer_out[name] = self.bw_layer_out[name]
                 bw_params[name] = self.bw_params[name]
 
-                sf_layer_in[name] = self.th_layer_in[name][0] /\
-                    (np.power(2.0, self.bw_layer_in[name] - 1) - 1)
-                sf_layer_out[name] = self.th_layer_out[name][0] /\
-                    (np.power(2.0, self.bw_layer_out[name] - 1) - 1)
-                sf_params[name] = self.th_params[name] /\
-                    (np.power(2.0, self.bw_params[name] - 1) - 1)
+                sf_layer_in[name] = self.th_layer_in[name][0] / (
+                    np.power(2.0, self.bw_layer_in[name] - 1) - 1
+                )
+                sf_layer_out[name] = self.th_layer_out[name][0] / (
+                    np.power(2.0, self.bw_layer_out[name] - 1) - 1
+                )
+                sf_params[name] = self.th_params[name] / (np.power(2.0, self.bw_params[name] - 1) - 1)
 
                 if layer_type in ["BatchNorm"]:
                     lp_data = layer_params[1].data + layer_params[2].data
-                    multiplier = \
-                        np.repeat(sf_layer_in[name] * sf_params[name]
-                                  / sf_layer_out[name]
-                                  * np.round(
-                                      np.clip(1.0 / np.sqrt(lp_data) /
-                                              sf_params[name],
-                                              -np.power(2.0, bw_params[name]-1)
-                                              + 1,
-                                              np.power(2.0, bw_params[name]-1)
-                                              - 1)
-                                      ),
-                                  1)
+                    multiplier = np.repeat(
+                        sf_layer_in[name]
+                        * sf_params[name]
+                        / sf_layer_out[name]
+                        * np.round(
+                            np.clip(
+                                1.0 / np.sqrt(lp_data) / sf_params[name],
+                                -np.power(2.0, bw_params[name] - 1) + 1,
+                                np.power(2.0, bw_params[name] - 1) - 1,
+                            )
+                        ),
+                        1,
+                    )
                 elif layer_type in ["Scale"]:
-                    multiplier = \
-                        np.repeat(sf_layer_in[name] * sf_params[name]
-                                  / sf_layer_out[name]
-                                  * np.round(
-                                      np.clip(layer_params[0].data /
-                                              sf_params[name],
-                                              -np.power(2.0, bw_params[name]-1)
-                                              + 1,
-                                              np.power(2.0, bw_params[name]-1)
-                                              - 1)),
-                                  1)
+                    multiplier = np.repeat(
+                        sf_layer_in[name]
+                        * sf_params[name]
+                        / sf_layer_out[name]
+                        * np.round(
+                            np.clip(
+                                layer_params[0].data / sf_params[name],
+                                -np.power(2.0, bw_params[name] - 1) + 1,
+                                np.power(2.0, bw_params[name] - 1) - 1,
+                            )
+                        ),
+                        1,
+                    )
 
                 # TODO
                 # logger.debug("multiplier: {}".format(name))
@@ -402,92 +388,80 @@ class QuantParamFactory(object):
                                 scale_bitwidth = 16
                                 postscale_shift_max = 32
 
-                        canonical_factor = \
-                            np.power(2, np.ceil(np.log2(multiplier[i])))
+                        canonical_factor = np.power(2, np.ceil(np.log2(multiplier[i])))
                         canonical_form = multiplier[i] / canonical_factor
 
                         shift = np.log2(canonical_factor)
                         lshift = np.clip(shift, 0, None)
                         rshift = -np.clip(shift, None, 0)
 
-                        prescale_shift[name][i] = \
-                            np.clip(rshift, 0, prescale_shift_max)
+                        prescale_shift[name][i] = np.clip(rshift, 0, prescale_shift_max)
                         rshift -= prescale_shift[name][i]
 
-                        postscale_shift[name][i] = \
-                            np.clip(rshift, 0, postscale_shift_max)
+                        postscale_shift[name][i] = np.clip(rshift, 0, postscale_shift_max)
                         rshift -= postscale_shift[name][i]
                         # TODO
                         # scale[name][i] = np.clip(canonical_form *
                         #   np.power(2, lshift - rshift), 0,
                         #   np.power(2, scale_bitwidth - 1))
                         scale[name][i] = np.clip(
-                            canonical_form * np.power(2, lshift - rshift),
-                            0,
-                            np.power(2, scale_bitwidth - 1))
+                            canonical_form * np.power(2, lshift - rshift), 0, np.power(2, scale_bitwidth - 1)
+                        )
 
-                        remaining_available_lshift = \
-                            np.floor(np.log2(np.power(2, scale_bitwidth - 1)
-                                             / scale[name][i]))
-                        remaining_available_rshift = \
-                            postscale_shift_max - postscale_shift[name][i]
-                        remaining_available_shift = \
-                            np.fmin(remaining_available_lshift,
-                                    remaining_available_rshift)
+                        remaining_available_lshift = np.floor(
+                            np.log2(np.power(2, scale_bitwidth - 1) / scale[name][i])
+                        )
+                        remaining_available_rshift = postscale_shift_max - postscale_shift[name][i]
+                        remaining_available_shift = np.fmin(
+                            remaining_available_lshift, remaining_available_rshift
+                        )
 
-                        scale[name][i] *= \
-                            np.power(2, remaining_available_shift)
+                        scale[name][i] *= np.power(2, remaining_available_shift)
                         postscale_shift[name][i] += remaining_available_shift
 
-                        prescale_shift[name][i] = \
-                            prescale_shift[name][i].astype(int)
+                        prescale_shift[name][i] = prescale_shift[name][i].astype(int)
                         scale[name][i] = np.round(scale[name][i]).astype(int)
-                        postscale_shift[name][i] = \
-                            postscale_shift[name][i].astype(int)
+                        postscale_shift[name][i] = postscale_shift[name][i].astype(int)
 
-                        prescale_shift[name][i] = \
-                            np.clip(prescale_shift[name][i], 0,
-                                    prescale_shift_max)
-                        scale[name][i] = \
-                            np.clip(scale[name][i], 0,
-                                    np.power(2, scale_bitwidth) - 1)
-                        postscale_shift[name][i] = \
-                            np.clip(postscale_shift[name][i], 0,
-                                    postscale_shift_max)
+                        prescale_shift[name][i] = np.clip(prescale_shift[name][i], 0, prescale_shift_max)
+                        scale[name][i] = np.clip(scale[name][i], 0, np.power(2, scale_bitwidth) - 1)
+                        postscale_shift[name][i] = np.clip(postscale_shift[name][i], 0, postscale_shift_max)
 
                 # TODO
                 scale[name] *= multiplier_sign
 
-                self.quant_params.append(name, {
-                    "name": name,
-                    "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
-                    "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
-                    "bw_params": self.bw_params[name],
-                    "th_layer_in": self.th_layer_in[name][0].tolist(),
-                    "th_layer_out": self.th_layer_out[name][0].tolist(),
-                    "th_params": self.th_params[name].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_in": sf_layer_in[name].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_out": sf_layer_out[name].tolist(),
-                    "sf_params": sf_params[name].tolist(),  # unused by xfdnn
-                    "prescale_shift":
-                    prescale_shift[name].astype(int).tolist(),
-                    "scale": scale[name].astype(int).tolist(),
-                    "postscale_shift":
-                    postscale_shift[name].astype(int).tolist()
-                })
+                self.quant_params.append(
+                    name,
+                    {
+                        "name": name,
+                        "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
+                        "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
+                        "bw_params": self.bw_params[name],
+                        "th_layer_in": self.th_layer_in[name][0].tolist(),
+                        "th_layer_out": self.th_layer_out[name][0].tolist(),
+                        "th_params": self.th_params[name].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_in": sf_layer_in[name].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_out": sf_layer_out[name].tolist(),
+                        "sf_params": sf_params[name].tolist(),  # unused by xfdnn
+                        "prescale_shift": prescale_shift[name].astype(int).tolist(),
+                        "scale": scale[name].astype(int).tolist(),
+                        "postscale_shift": postscale_shift[name].astype(int).tolist(),
+                    },
+                )
             elif layer_type in ["Eltwise"]:
                 bw_layer_in[name] = self.bw_layer_in[name]
                 bw_layer_out[name] = self.bw_layer_out[name]
 
-                sf_layer_in[name] = self.th_layer_in[name][0] /\
-                    (np.power(2.0, self.bw_layer_in[name] - 1) - 1)
-                sf_layer_out[name] = self.th_layer_out[name][0] /\
-                    (np.power(2.0, self.bw_layer_out[name] - 1) - 1)
+                sf_layer_in[name] = self.th_layer_in[name][0] / (
+                    np.power(2.0, self.bw_layer_in[name] - 1) - 1
+                )
+                sf_layer_out[name] = self.th_layer_out[name][0] / (
+                    np.power(2.0, self.bw_layer_out[name] - 1) - 1
+                )
 
-                multiplier = \
-                    np.repeat(sf_layer_in[name] / sf_layer_out[name], 1)
+                multiplier = np.repeat(sf_layer_in[name] / sf_layer_out[name], 1)
 
                 prescale_shift[name] = np.zeros_like(multiplier)
                 scale[name] = np.ones_like(multiplier)
@@ -518,72 +492,59 @@ class QuantParamFactory(object):
                                 scale_bitwidth = 16
                                 postscale_shift_max = 32
 
-                        canonical_factor = \
-                            np.power(2, np.ceil(np.log2(multiplier[i])))
+                        canonical_factor = np.power(2, np.ceil(np.log2(multiplier[i])))
                         canonical_form = multiplier[i] / canonical_factor
 
                         shift = np.log2(canonical_factor)
                         lshift = np.clip(shift, 0, None)
                         rshift = -np.clip(shift, None, 0)
 
-                        prescale_shift[name][i] = \
-                            np.clip(rshift, 0, prescale_shift_max)
+                        prescale_shift[name][i] = np.clip(rshift, 0, prescale_shift_max)
                         rshift -= prescale_shift[name][i]
 
-                        postscale_shift[name][i] = \
-                            np.clip(rshift, 0, postscale_shift_max)
+                        postscale_shift[name][i] = np.clip(rshift, 0, postscale_shift_max)
                         rshift -= postscale_shift[name][i]
 
-                        scale[name][i] = \
-                            np.clip(canonical_form *
-                                    np.power(2, lshift - rshift), 0,
-                                    np.power(2, scale_bitwidth - 1))
+                        scale[name][i] = np.clip(
+                            canonical_form * np.power(2, lshift - rshift), 0, np.power(2, scale_bitwidth - 1)
+                        )
 
-                        remaining_available_lshift = \
-                            np.floor(np.log2(np.power(2, scale_bitwidth - 1) /
-                                     scale[name][i]))
-                        remaining_available_rshift = \
-                            postscale_shift_max - postscale_shift[name][i]
-                        remaining_available_shift = \
-                            np.fmin(remaining_available_lshift,
-                                    remaining_available_rshift)
+                        remaining_available_lshift = np.floor(
+                            np.log2(np.power(2, scale_bitwidth - 1) / scale[name][i])
+                        )
+                        remaining_available_rshift = postscale_shift_max - postscale_shift[name][i]
+                        remaining_available_shift = np.fmin(
+                            remaining_available_lshift, remaining_available_rshift
+                        )
 
-                        scale[name][i] *= \
-                            np.power(2, remaining_available_shift)
+                        scale[name][i] *= np.power(2, remaining_available_shift)
                         postscale_shift[name][i] += remaining_available_shift
 
-                        prescale_shift[name][i] = \
-                            prescale_shift[name][i].astype(int)
+                        prescale_shift[name][i] = prescale_shift[name][i].astype(int)
                         scale[name][i] = np.round(scale[name][i]).astype(int)
-                        postscale_shift[name][i] = \
-                            postscale_shift[name][i].astype(int)
+                        postscale_shift[name][i] = postscale_shift[name][i].astype(int)
 
-                        prescale_shift[name][i] = \
-                            np.clip(prescale_shift[name][i], 0,
-                                    prescale_shift_max)
-                        scale[name][i] = \
-                            np.clip(scale[name][i], 0,
-                                    np.power(2, scale_bitwidth) - 1)
-                        postscale_shift[name][i] = \
-                            np.clip(postscale_shift[name][i], 0,
-                                    postscale_shift_max)
+                        prescale_shift[name][i] = np.clip(prescale_shift[name][i], 0, prescale_shift_max)
+                        scale[name][i] = np.clip(scale[name][i], 0, np.power(2, scale_bitwidth) - 1)
+                        postscale_shift[name][i] = np.clip(postscale_shift[name][i], 0, postscale_shift_max)
 
-                self.quant_params.append(name, {
-                    "name": name,
-                    "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
-                    "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
-                    "th_layer_in": self.th_layer_in[name][0].tolist(),
-                    "th_layer_out": self.th_layer_out[name][0].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_in": sf_layer_in[name].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_out": sf_layer_out[name].tolist(),
-                    "prescale_shift":\
-                    prescale_shift[name].astype(int).tolist(),
-                    "scale": scale[name].astype(int).tolist(),
-                    "postscale_shift":
-                    postscale_shift[name].astype(int).tolist()
-                })
+                self.quant_params.append(
+                    name,
+                    {
+                        "name": name,
+                        "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
+                        "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
+                        "th_layer_in": self.th_layer_in[name][0].tolist(),
+                        "th_layer_out": self.th_layer_out[name][0].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_in": sf_layer_in[name].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_out": sf_layer_out[name].tolist(),
+                        "prescale_shift": prescale_shift[name].astype(int).tolist(),
+                        "scale": scale[name].astype(int).tolist(),
+                        "postscale_shift": postscale_shift[name].astype(int).tolist(),
+                    },
+                )
             elif layer_type in ["Pooling"]:
                 # L = next(L for L in net_parameter.layer if L.name in
                 #   net.top_names[name])
@@ -599,15 +560,18 @@ class QuantParamFactory(object):
                 bw_layer_in[name] = self.bw_layer_in[name]
                 bw_layer_out[name] = self.bw_layer_out[name]
 
-                sf_layer_in[name] = self.th_layer_in[name][0] /\
-                    (np.power(2.0, self.bw_layer_in[name] - 1) - 1)
-                sf_layer_out[name] = self.th_layer_out[name][0] /\
-                    (np.power(2.0, self.bw_layer_out[name] - 1) - 1)
+                sf_layer_in[name] = self.th_layer_in[name][0] / (
+                    np.power(2.0, self.bw_layer_in[name] - 1) - 1
+                )
+                sf_layer_out[name] = self.th_layer_out[name][0] / (
+                    np.power(2.0, self.bw_layer_out[name] - 1) - 1
+                )
 
                 # multiplier = np.repeat(sf_layer_in / sf_layer_out /
                 #   pow(L.pooling_param.kernel_size, 2), num_output)
-                multiplier = np.repeat(sf_layer_in[name] / sf_layer_out[name]
-                                       / layer_params.data[0], num_output)
+                multiplier = np.repeat(
+                    sf_layer_in[name] / sf_layer_out[name] / layer_params.data[0], num_output
+                )
 
                 prescale_shift[name] = np.zeros_like(multiplier)
                 scale[name] = np.ones_like(multiplier)
@@ -638,70 +602,59 @@ class QuantParamFactory(object):
                                 scale_bitwidth = 16
                                 postscale_shift_max = 32
 
-                        canonical_factor = \
-                            np.power(2, np.ceil(np.log2(multiplier[i])))
+                        canonical_factor = np.power(2, np.ceil(np.log2(multiplier[i])))
                         canonical_form = multiplier[i] / canonical_factor
 
                         shift = np.log2(canonical_factor)
                         lshift = np.clip(shift, 0, None)
                         rshift = -np.clip(shift, None, 0)
 
-                        prescale_shift[name][i] = np.clip(rshift, 0,
-                                                          prescale_shift_max)
+                        prescale_shift[name][i] = np.clip(rshift, 0, prescale_shift_max)
                         rshift -= prescale_shift[name][i]
 
-                        postscale_shift[name][i] = np.clip(rshift, 0,
-                                                           postscale_shift_max)
+                        postscale_shift[name][i] = np.clip(rshift, 0, postscale_shift_max)
                         rshift -= postscale_shift[name][i]
 
-                        scale[name][i] = \
-                            np.clip(canonical_form *
-                                    np.power(2, lshift - rshift), 0,
-                                    np.power(2, scale_bitwidth - 1))
+                        scale[name][i] = np.clip(
+                            canonical_form * np.power(2, lshift - rshift), 0, np.power(2, scale_bitwidth - 1)
+                        )
 
-                        remaining_available_lshift = \
-                            np.floor(np.log2(np.power(2, scale_bitwidth - 1) /
-                                     scale[name][i]))
-                        remaining_available_rshift = \
-                            postscale_shift_max - postscale_shift[name][i]
-                        remaining_available_shift = \
-                            np.fmin(remaining_available_lshift,
-                                    remaining_available_rshift)
+                        remaining_available_lshift = np.floor(
+                            np.log2(np.power(2, scale_bitwidth - 1) / scale[name][i])
+                        )
+                        remaining_available_rshift = postscale_shift_max - postscale_shift[name][i]
+                        remaining_available_shift = np.fmin(
+                            remaining_available_lshift, remaining_available_rshift
+                        )
 
-                        scale[name][i] *= \
-                            np.power(2, remaining_available_shift)
+                        scale[name][i] *= np.power(2, remaining_available_shift)
                         postscale_shift[name][i] += remaining_available_shift
 
-                        prescale_shift[name][i] = \
-                            prescale_shift[name][i].astype(int)
+                        prescale_shift[name][i] = prescale_shift[name][i].astype(int)
                         scale[name][i] = np.round(scale[name][i]).astype(int)
-                        postscale_shift[name][i] = \
-                            postscale_shift[name][i].astype(int)
+                        postscale_shift[name][i] = postscale_shift[name][i].astype(int)
 
-                self.quant_params.append(name, {
-                    "name": name,
-                    "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
-                    "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
-                    "th_layer_in": self.th_layer_in[name][0].tolist(),
-                    "th_layer_out": self.th_layer_out[name][0].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_in": sf_layer_in[name].tolist(),
-                    # unused by xfdnn
-                    "sf_layer_out": sf_layer_out[name].tolist(),
-                    "prescale_shift":
-                    prescale_shift[name].astype(int).tolist(),
-                    "scale": scale[name].astype(int).tolist(),
-                    "postscale_shift":
-                    postscale_shift[name].astype(int).tolist()
-                })
+                self.quant_params.append(
+                    name,
+                    {
+                        "name": name,
+                        "bw_layer_in": self.bw_layer_in[name],  # unused by xfdnn
+                        "bw_layer_out": self.bw_layer_out[name],  # unused by xfdnn
+                        "th_layer_in": self.th_layer_in[name][0].tolist(),
+                        "th_layer_out": self.th_layer_out[name][0].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_in": sf_layer_in[name].tolist(),
+                        # unused by xfdnn
+                        "sf_layer_out": sf_layer_out[name].tolist(),
+                        "prescale_shift": prescale_shift[name].astype(int).tolist(),
+                        "scale": scale[name].astype(int).tolist(),
+                        "postscale_shift": postscale_shift[name].astype(int).tolist(),
+                    },
+                )
             # json.dump(json_payload, g, indent=4, sort_keys=True)
         self.quant_params.save(fname)
 
-    def rebuild_from_scratch(self,
-                             xgraph,
-                             quant_params,
-                             quantizecfg,
-                             bitwidth=8):
+    def rebuild_from_scratch(self, xgraph, quant_params, quantizecfg, bitwidth=8):
         # type: (XGraph, QuantParams, str, int) -> QuantParams
         """
         Rebuild a quant_params object from scratch. This might happen
@@ -718,43 +671,47 @@ class QuantParamFactory(object):
             top_Ps = xgraph.get_top_layers(P.name)
 
             if P.name in quant_params:
-                if 'Convolution' in P.type or 'Pooling' in P.type or \
-                        'Eltwise' in P.type or 'Scale' in P.type or \
-                        'Concat' in P.type:
+                if (
+                    "Convolution" in P.type
+                    or "Pooling" in P.type
+                    or "Eltwise" in P.type
+                    or "Scale" in P.type
+                    or "Concat" in P.type
+                ):
 
-                    assert(len(P.type) == 1)
+                    assert len(P.type) == 1
 
-                    if 'Scale' in P.type:
-                        assert(isinstance(P.data, layer.ScaleData))
+                    if "Scale" in P.type:
+                        assert isinstance(P.data, layer.ScaleData)
                         gamma = P.data.gamma
-                        quant_layers.append((P.name, P.type[0],
-                                             [LayerParams(gamma)]))
-                    elif 'Pooling' in P.type:
+                        quant_layers.append((P.name, P.type[0], [LayerParams(gamma)]))
+                    elif "Pooling" in P.type:
                         # P.pool == 0 => max pooling
-                        pool_divisor = [1] if P.attrs['pool_type'] == 'Max'\
-                            else [np.prod(P.attrs['kernel_size'])]
-                        quant_layers.append((P.name, P.type[0],
-                                             LayerParams(pool_divisor)))
+                        pool_divisor = (
+                            [1] if P.attrs["pool_type"] == "Max" else [np.prod(P.attrs["kernel_size"])]
+                        )
+                        quant_layers.append((P.name, P.type[0], LayerParams(pool_divisor)))
                     else:
                         quant_layers.append((P.name, P.type[0], None))
 
-                    th_in = quant_params[P.name]['th_layer_in']
-                    th_out = quant_params[P.name]['th_layer_out']
+                    th_in = quant_params[P.name]["th_layer_in"]
+                    th_out = quant_params[P.name]["th_layer_out"]
 
                     self.bw_layer_in[P.name] = bitwidth
                     self.th_layer_in[P.name] = np.array([th_in])
                     self.bw_layer_out[P.name] = bitwidth
                     self.th_layer_out[P.name] = np.array([th_out])
 
-                    if 'th_params' in quant_params[P.name]:
-                        th_params = quant_params[P.name]['th_params']
+                    if "th_params" in quant_params[P.name]:
+                        th_params = quant_params[P.name]["th_params"]
                         self.bw_params[P.name] = bitwidth
                         self.th_params[P.name] = np.array(th_params)
                 else:
-                    raise NotImplementedError("Operation: {} of type: {}"
-                                              " not supported in quantization"
-                                              " parameter rebuilding"
-                                              " functionaility"
-                                              .format(P.name, P.type[0]))
+                    raise NotImplementedError(
+                        "Operation: {} of type: {}"
+                        " not supported in quantization"
+                        " parameter rebuilding"
+                        " functionaility".format(P.name, P.type[0])
+                    )
 
         self.save_to_dpu_v1_json(quant_layers, quantizecfg)

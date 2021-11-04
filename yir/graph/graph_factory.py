@@ -17,8 +17,8 @@ Module for creating Graph objects
 """
 
 import logging
-
 from typing import List
+
 from .graph import Graph
 from .layer import Layer
 
@@ -26,13 +26,14 @@ logger = logging.getLogger("pyxir")
 
 
 class XGraphFactory:
-
-    def build_from_xlayer(self,
-                          net: List[Layer],
-                          xgraph: Graph = None,
-                          name: str = 'xgraph',
-                          blobs: bool = False,
-                          output_png: str = None) -> Graph:
+    def build_from_xlayer(
+        self,
+        net: List[Layer],
+        xgraph: Graph = None,
+        name: str = "xgraph",
+        blobs: bool = False,
+        output_png: str = None,
+    ) -> Graph:
         """
         Build the Graph from a list of XLayers
         """
