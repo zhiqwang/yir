@@ -1,5 +1,5 @@
 #include "inline_block.h"
-#include "../pass_level1.h"
+#include "../jit.h"
 
 #include <set>
 
@@ -77,11 +77,6 @@ static void inlineCalls(
       inlineCalls(function.graph()->block(), module_operators, inlined_modules);
 
       inlined_modules.insert(class_type_str_no_torch_prefix);
-
-      // fprintf(stderr, "inline %s\n", class_type_str_no_torch_prefix.c_str());
-      // fprintf(stderr, "inline method %s   %s   %s\n", function.name().c_str(),
-      // class_type->str().c_str(),
-      // n->input(0)->node()->s(torch::jit::attr::name).c_str());
 
       pnnx::inlineCallTo(n, &function);
     } else {

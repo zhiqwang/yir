@@ -93,7 +93,7 @@ static void show_usage() {
   fprintf(stderr, "  ncnnparam=model.ncnn.param\n");
   fprintf(stderr, "  ncnnbin=model.ncnn.bin\n");
   fprintf(stderr, "  ncnnpy=model_ncnn.py\n");
-  fprintf(stderr, "  optlevel=2\n");
+  fprintf(stderr, "  optlevel=0\n");
   fprintf(stderr, "  device=cpu/gpu\n");
   fprintf(stderr, "  inputshape=[1,3,224,224],...\n");
   fprintf(stderr, "  inputshape2=[1,3,320,320],...\n");
@@ -126,7 +126,7 @@ int main(int argc, char** argv) {
   std::string ncnnparampath = ptbase + ".ncnn.param";
   std::string ncnnbinpath = ptbase + ".ncnn.bin";
   std::string ncnnpypath = ptbase + "_ncnn.py";
-  int optlevel = 2;
+  int optlevel = 0;
   std::string device = "cpu";
   std::vector<std::vector<int64_t>> input_shapes;
   std::vector<std::vector<int64_t>> input_shapes2;
