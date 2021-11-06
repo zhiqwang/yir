@@ -1,5 +1,5 @@
 #include "inline_block.h"
-#include "../jit.h"
+#include "../trace.h"
 
 #include <set>
 
