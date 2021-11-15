@@ -1,3 +1,17 @@
+// Tencent is pleased to support the open source community by making ncnn available.
+//
+// Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+
 #include "ir.h"
 
 #include <stdint.h>
@@ -159,7 +173,7 @@ Parameter::Parameter(const torch::jit::Node* value_node) {
         if (t.dim() == 0) {
           if (t.scalar_type() == c10::ScalarType::Long) {
             type = 2;
-            i = (int)t.item<long>();
+            i = (int)t.item<int64_t>();
           } else if (t.scalar_type() == c10::ScalarType::Int) {
             type = 2;
             i = t.item<int>();
@@ -323,6 +337,25 @@ Parameter Parameter::parse_from_string(const std::string& value) {
   p.type = 2;
   p.i = std::stoi(value);
   return p;
+}
+
+Graph::Graph() {}
+
+Graph::~Graph() {
+  for (auto x : ops)
+    delete x;
+
+  for (auto x : operands)
+    delete x;
+
+  ops.clear();
+  operands.clear();
+}
+
+Graph::Graph(const Graph& /*rhs*/) {}
+
+Graph& Graph::operator=(const Graph& /*rhs*/) {
+  return *this;
 }
 
 static void load_parameter(Operator* op, const std::string& key, const std::string& value) {
@@ -759,12 +792,16 @@ static std::string expand_expression(const Operator* op) {
 
       std::string r = a + ".size(" + b + ")";
       exprstack.push(r);
-    } else if (t == "int" || t == "sqrt") {
+    } else if (t == "int" || t == "sqrt" || t == "rsqrt" || t == "neg") {
       std::string unaryop;
       if (t == "int")
         unaryop = "int";
       if (t == "sqrt")
         unaryop = "torch.sqrt";
+      if (t == "rsqrt")
+        unaryop = "torch.rsqrt";
+      if (t == "neg")
+        unaryop = "torch.neg";
 
       std::string a = exprstack.top();
       exprstack.pop();
@@ -1266,12 +1303,16 @@ int Graph::python(const std::string& pypath, const std::string& pnnxbinpath) {
         }
         fprintf(pyfp, "]\n");
       } else if (op->type == "nn.LSTM") {
-        fprintf(
-            pyfp,
-            "v_%s, (v_%s, v_%s)",
-            sanitize_identifier(op->outputs[0]->name).c_str(),
-            sanitize_identifier(op->outputs[1]->name).c_str(),
-            sanitize_identifier(op->outputs[2]->name).c_str());
+        if (op->outputs.size() == 1) {
+          fprintf(pyfp, "v_%s, _", sanitize_identifier(op->outputs[0]->name).c_str());
+        } else {
+          fprintf(
+              pyfp,
+              "v_%s, (v_%s, v_%s)",
+              sanitize_identifier(op->outputs[0]->name).c_str(),
+              sanitize_identifier(op->outputs[1]->name).c_str(),
+              sanitize_identifier(op->outputs[2]->name).c_str());
+        }
         fprintf(pyfp, " = self.%s(", sanitize_identifier(op->name).c_str());
         fprintf(pyfp, "v_%s", sanitize_identifier(op->inputs[0]->name).c_str());
         if (op->inputs.size() == 3) {

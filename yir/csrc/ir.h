@@ -1,3 +1,17 @@
+// Tencent is pleased to support the open source community by making ncnn available.
+//
+// Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+
 #ifndef PNNX_IR_H
 #define PNNX_IR_H
 
@@ -8,8 +22,8 @@
 
 namespace torch {
 namespace jit {
-class Value;
-class Node;
+struct Value;
+struct Node;
 } // namespace jit
 } // namespace torch
 namespace at {
@@ -30,7 +44,7 @@ class Parameter {
   Parameter(const char* _s) : type(4), s(_s) {}
   Parameter(const std::string& _s) : type(4), s(_s) {}
   Parameter(const std::initializer_list<int>& _ai) : type(5), ai(_ai) {}
-  Parameter(const std::initializer_list<long>& _ai) : type(5) {
+  Parameter(const std::initializer_list<int64_t>& _ai) : type(5) {
     for (const auto& x : _ai)
       ai.push_back((int)x);
   }
@@ -121,6 +135,9 @@ class Operator {
 
 class Graph {
  public:
+  Graph();
+  ~Graph();
+
   int load(const std::string& parampath, const std::string& binpath);
   int save(const std::string& parampath, const std::string& binpath);
 
@@ -145,6 +162,10 @@ class Graph {
 
   std::vector<Operator*> ops;
   std::vector<Operand*> operands;
+
+ private:
+  Graph(const Graph& rhs);
+  Graph& operator=(const Graph& rhs);
 };
 
 } // namespace pnnx

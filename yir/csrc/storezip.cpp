@@ -1,3 +1,17 @@
+// Tencent is pleased to support the open source community by making ncnn available.
+//
+// Copyright (C) 2021 THL A29 Limited, a Tencent company. All rights reserved.
+//
+// Licensed under the BSD 3-Clause License (the "License"); you may not use this file except
+// in compliance with the License. You may obtain a copy of the License at
+//
+// https://opensource.org/licenses/BSD-3-Clause
+//
+// Unless required by applicable law or agreed to in writing, software distributed
+// under the License is distributed on an "AS IS" BASIS, WITHOUT WARRANTIES OR
+// CONDITIONS OF ANY KIND, either express or implied. See the License for the
+// specific language governing permissions and limitations under the License.
+
 #include "storezip.h"
 
 #include <stdint.h>
@@ -8,7 +22,14 @@
 
 namespace pnnx {
 
-struct local_file_header {
+// https://stackoverflow.com/questions/1537964/visual-c-equivalent-of-gccs-attribute-packed
+#ifdef _MSC_VER
+#define PACK(__Declaration__) __pragma(pack(push, 1)) __Declaration__ __pragma(pack(pop))
+#else
+#define PACK(__Declaration__) __Declaration__ __attribute__((__packed__))
+#endif
+
+PACK(struct local_file_header {
   uint16_t version;
   uint16_t flag;
   uint16_t compression;
@@ -19,9 +40,9 @@ struct local_file_header {
   uint32_t uncompressed_size;
   uint16_t file_name_length;
   uint16_t extra_field_length;
-} __attribute__((packed));
+});
 
-struct central_directory_file_header {
+PACK(struct central_directory_file_header {
   uint16_t version_made;
   uint16_t version;
   uint16_t flag;
@@ -38,9 +59,9 @@ struct central_directory_file_header {
   uint16_t internal_file_attrs;
   uint32_t external_file_attrs;
   uint32_t lfh_offset;
-} __attribute__((packed));
+});
 
-struct end_of_central_directory_record {
+PACK(struct end_of_central_directory_record {
   uint16_t disk_number;
   uint16_t start_disk;
   uint16_t cd_records;
@@ -48,7 +69,7 @@ struct end_of_central_directory_record {
   uint32_t cd_size;
   uint32_t cd_offset;
   uint16_t comment_length;
-} __attribute__((packed));
+});
 
 static uint32_t CRC32_TABLE[256];
 
@@ -130,7 +151,7 @@ int StoreZipReader::open(const std::string& path) {
 
       filemetas[name] = fm;
 
-      // fprintf(stderr, "%s = %d  %d\n", name.c_str(), fm.offset, fm.size);
+      //             fprintf(stderr, "%s = %d  %d\n", name.c_str(), fm.offset, fm.size);
 
       fseek(fp, lfh.compressed_size, SEEK_CUR);
     } else if (signature == 0x02014b50) {
@@ -311,3 +332,33 @@ int StoreZipWriter::close() {
 }
 
 } // namespace pnnx
+
+#if 0
+int main()
+{
+    StoreZipReader sz;
+
+    sz.open("test.zip");
+
+    std::vector<float> data1;
+    sz.read_file("pnnx2.py", data1);
+
+    std::vector<float> data2;
+    sz.read_file("pnnx2.param", data2);
+
+    sz.close();
+
+
+    StoreZipWriter szw;
+
+    szw.open("szw.zip");
+
+    szw.write_file("a.py", data1);
+    szw.write_file("zzzz.param", data2);
+
+    szw.close();
+
+
+    return 0;
+}
+#endif
