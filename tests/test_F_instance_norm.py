@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -30,6 +31,7 @@ class Model(nn.Module):
         z = F.instance_norm(z, m2, v2, w2, b2)
         z = F.instance_norm(z, m2, v2, None, None, eps=1e-2)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -60,13 +62,18 @@ def test():
 
     # torchscript to pnnx
     import os
-    os.system("../src/pnnx test_F_instance_norm.pt inputshape=[1,12,24],[2,3,12,16],[1,10,12,16,24],[12],[12],[12],[12],[3],[3],[3],[3],[10],[10],[10],[10]")
+
+    os.system(
+        "../src/pnnx test_F_instance_norm.pt inputshape=[1,12,24],[2,3,12,16],[1,10,12,16,24],[12],[12],[12],[12],[3],[3],[3],[3],[10],[10],[10],[10]"
+    )
 
     # pnnx inference
     import test_F_instance_norm_pnnx
+
     b0, b1, b2 = test_F_instance_norm_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2)
+
 
 if __name__ == "__main__":
     if test():

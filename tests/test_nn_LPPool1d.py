@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -38,6 +39,7 @@ class Model(nn.Module):
         x = self.pool_6(x)
         return x
 
+
 def test():
     net = Model()
     net.eval()
@@ -53,13 +55,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_LPPool1d.pt inputshape=[1,12,128]")
 
     # pnnx inference
     import test_nn_LPPool1d_pnnx
+
     b = test_nn_LPPool1d_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

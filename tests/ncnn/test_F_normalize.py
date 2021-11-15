@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -25,10 +26,11 @@ class Model(nn.Module):
         x = F.normalize(x, eps=1e-3)
 
         # TODO
-        #y = F.normalize(y, p=1, dim=1)
-        #y = F.normalize(y, dim=2)
+        # y = F.normalize(y, p=1, dim=1)
+        # y = F.normalize(y, dim=2)
 
         return x
+
 
 def test():
     net = Model()
@@ -45,13 +47,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_F_normalize.pt inputshape=[1,12,24,64]")
 
     # ncnn inference
     import test_F_normalize_ncnn
+
     b = test_F_normalize_ncnn.test_inference()
 
     return torch.allclose(a, b, 1e-4, 1e-4)
+
 
 if __name__ == "__main__":
     if test():

@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -29,6 +30,7 @@ class Model(nn.Module):
         x = self.gn_1(x)
         x = self.gn_2(x)
         return x
+
 
 def test():
     net = Model()
@@ -45,13 +47,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_nn_GroupNorm.pt inputshape=[1,12,24,64]")
 
     # ncnn inference
     import test_nn_GroupNorm_ncnn
+
     b0 = test_nn_GroupNorm_ncnn.test_inference()
 
     return torch.allclose(a0, b0, 1e-4, 1e-4)
+
 
 if __name__ == "__main__":
     if test():

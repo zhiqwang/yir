@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -27,6 +28,7 @@ class Model(nn.Module):
         y = self.act_0(y)
         z = self.act_0(z)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -45,16 +47,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_nn_Sigmoid.pt inputshape=[1,12],[1,12,64],[1,12,24,64]")
 
     # ncnn inference
     import test_nn_Sigmoid_ncnn
+
     b = test_nn_Sigmoid_ncnn.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.allclose(a0, b0, 1e-4, 1e-4):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():

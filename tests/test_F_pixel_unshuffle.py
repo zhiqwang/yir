@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -24,6 +25,7 @@ class Model(nn.Module):
         x = F.pixel_unshuffle(x, 4)
         x = F.pixel_unshuffle(x, 2)
         return x
+
 
 def test():
     net = Model()
@@ -40,13 +42,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_F_pixel_unshuffle.pt inputshape=[1,3,128,128]")
 
     # pnnx inference
     import test_F_pixel_unshuffle_pnnx
+
     b = test_F_pixel_unshuffle_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

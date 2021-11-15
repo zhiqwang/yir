@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -30,6 +31,7 @@ class Model(nn.Module):
         z = F.group_norm(z, 32, w2, b2)
         z = F.group_norm(z, 4, None, None, eps=1e-2)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -54,13 +56,18 @@ def test():
 
     # torchscript to pnnx
     import os
-    os.system("../src/pnnx test_F_group_norm.pt inputshape=[1,16],[12,12,16],[1,32,12,16],[16],[16],[12],[12],[32],[32]")
+
+    os.system(
+        "../src/pnnx test_F_group_norm.pt inputshape=[1,16],[12,12,16],[1,32,12,16],[16],[16],[12],[12],[32],[32]"
+    )
 
     # pnnx inference
     import test_F_group_norm_pnnx
+
     b0, b1, b2 = test_F_group_norm_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2)
+
 
 if __name__ == "__main__":
     if test():

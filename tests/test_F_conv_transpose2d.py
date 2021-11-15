@@ -16,14 +16,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x, w0, w1, b1):
-        x = F.conv_transpose2d(x, w0, None, stride=(2,2), padding=(1,1), output_padding=(1,1))
-        x = F.conv_transpose2d(x, w1, b1, stride=(1,2), padding=(2,1), dilation=(2,1), groups=2)
+        x = F.conv_transpose2d(x, w0, None, stride=(2, 2), padding=(1, 1), output_padding=(1, 1))
+        x = F.conv_transpose2d(x, w1, b1, stride=(1, 2), padding=(2, 1), dilation=(2, 1), groups=2)
         return x
+
 
 def test():
     net = Model()
@@ -43,13 +45,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_F_conv_transpose2d.pt inputshape=[1,12,22,32],[12,16,3,3],[16,8,5,5],[16]")
 
     # pnnx inference
     import test_F_conv_transpose2d_pnnx
+
     b = test_F_conv_transpose2d_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

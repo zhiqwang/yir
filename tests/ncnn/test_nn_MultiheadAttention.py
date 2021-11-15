@@ -16,24 +16,26 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
         self.attention_0_0 = nn.MultiheadAttention(embed_dim=64, num_heads=4)
 
-        if torch.__version__ >= '1.9':
+        if torch.__version__ >= "1.9":
             self.attention_1_0 = nn.MultiheadAttention(embed_dim=40, num_heads=4, batch_first=True)
 
     def forward(self, x, y):
         x0, _ = self.attention_0_0(x, x, x)
 
-        if torch.__version__ < '1.9':
+        if torch.__version__ < "1.9":
             return x0
 
         y0, _ = self.attention_1_0(y, y, y)
 
         return x0, y0
+
 
 def test():
     net = Model()
@@ -51,16 +53,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_nn_MultiheadAttention.pt inputshape=[1,1,64],[1,15,40]")
 
     # ncnn inference
     import test_nn_MultiheadAttention_ncnn
+
     b = test_nn_MultiheadAttention_ncnn.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.allclose(a0, b0, 1e-4, 1e-4):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():

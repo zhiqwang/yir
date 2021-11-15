@@ -16,18 +16,20 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
-        #self.pool_0 = nn.AdaptiveAvgPool3d(output_size=(7,6,5), return_indices=True)
-        self.pool_0 = nn.AdaptiveAvgPool3d(output_size=(7,6,5))
+        # self.pool_0 = nn.AdaptiveAvgPool3d(output_size=(7,6,5), return_indices=True)
+        self.pool_0 = nn.AdaptiveAvgPool3d(output_size=(7, 6, 5))
         self.pool_1 = nn.AdaptiveAvgPool3d(output_size=1)
 
     def forward(self, x):
         x = self.pool_0(x)
         x = self.pool_1(x)
         return x
+
 
 def test():
     net = Model()
@@ -44,13 +46,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_AdaptiveAvgPool3d.pt inputshape=[1,128,13,13,13]")
 
     # pnnx inference
     import test_nn_AdaptiveAvgPool3d_pnnx
+
     b = test_nn_AdaptiveAvgPool3d_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

@@ -16,19 +16,21 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
         self.pad_0 = nn.ReflectionPad1d(2)
-        self.pad_1 = nn.ReflectionPad1d(padding=(3,4))
-        self.pad_2 = nn.ReflectionPad1d(padding=(1,0))
+        self.pad_1 = nn.ReflectionPad1d(padding=(3, 4))
+        self.pad_2 = nn.ReflectionPad1d(padding=(1, 0))
 
     def forward(self, x):
         x = self.pad_0(x)
         x = self.pad_1(x)
         x = self.pad_2(x)
         return x
+
 
 def test():
     net = Model()
@@ -45,13 +47,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_nn_ReflectionPad1d.pt inputshape=[1,12,13]")
 
     # ncnn inference
     import test_nn_ReflectionPad1d_ncnn
+
     b = test_nn_ReflectionPad1d_ncnn.test_inference()
 
     return torch.allclose(a, b, 1e-4, 1e-4)
+
 
 if __name__ == "__main__":
     if test():

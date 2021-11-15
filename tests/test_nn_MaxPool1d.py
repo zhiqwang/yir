@@ -16,17 +16,28 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
         self.pool_0 = nn.MaxPool1d(kernel_size=3)
         self.pool_1 = nn.MaxPool1d(kernel_size=4, stride=2, padding=2, dilation=1)
-        self.pool_2 = nn.MaxPool1d(kernel_size=3, stride=1, padding=1, dilation=1, return_indices=False, ceil_mode=False)
-        self.pool_3 = nn.MaxPool1d(kernel_size=5, stride=2, padding=2, dilation=1, return_indices=False, ceil_mode=True)
-        self.pool_4 = nn.MaxPool1d(kernel_size=3, stride=1, padding=1, dilation=2, return_indices=False, ceil_mode=False)
-        self.pool_5 = nn.MaxPool1d(kernel_size=2, stride=1, padding=0, dilation=1, return_indices=False, ceil_mode=True)
-        self.pool_6 = nn.MaxPool1d(kernel_size=5, stride=1, padding=2, dilation=1, return_indices=True, ceil_mode=False)
+        self.pool_2 = nn.MaxPool1d(
+            kernel_size=3, stride=1, padding=1, dilation=1, return_indices=False, ceil_mode=False
+        )
+        self.pool_3 = nn.MaxPool1d(
+            kernel_size=5, stride=2, padding=2, dilation=1, return_indices=False, ceil_mode=True
+        )
+        self.pool_4 = nn.MaxPool1d(
+            kernel_size=3, stride=1, padding=1, dilation=2, return_indices=False, ceil_mode=False
+        )
+        self.pool_5 = nn.MaxPool1d(
+            kernel_size=2, stride=1, padding=0, dilation=1, return_indices=False, ceil_mode=True
+        )
+        self.pool_6 = nn.MaxPool1d(
+            kernel_size=5, stride=1, padding=2, dilation=1, return_indices=True, ceil_mode=False
+        )
 
     def forward(self, x):
         x = self.pool_0(x)
@@ -37,6 +48,7 @@ class Model(nn.Module):
         x = self.pool_5(x)
         x, indices = self.pool_6(x)
         return x, indices
+
 
 def test():
     net = Model()
@@ -53,13 +65,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_MaxPool1d.pt inputshape=[1,12,64]")
 
     # pnnx inference
     import test_nn_MaxPool1d_pnnx
+
     b0, b1 = test_nn_MaxPool1d_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1)
+
 
 if __name__ == "__main__":
     if test():

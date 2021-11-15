@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -24,6 +25,7 @@ class Model(nn.Module):
         x = F.conv_transpose1d(x, w0, None, stride=2, padding=1, output_padding=1)
         x = F.conv_transpose1d(x, w1, b1, stride=1, padding=2, dilation=2, groups=2)
         return x
+
 
 def test():
     net = Model()
@@ -43,13 +45,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_F_conv_transpose1d.pt inputshape=[1,12,22],[12,16,3],[16,8,5],[16]")
 
     # pnnx inference
     import test_F_conv_transpose1d_pnnx
+
     b = test_F_conv_transpose1d_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

@@ -16,18 +16,20 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x, y):
-        x = x[:,:12,1:14:1]
-        x = x[...,1:]
-        x = x[:,:,:x.size(2)-1]
-        y = y[:,1:,5:,3:]
-        y = y[:,:,1:13:1,:14]
-        y = y[:,:y.size(1):,:,:]
+        x = x[:, :12, 1:14:1]
+        x = x[..., 1:]
+        x = x[:, :, : x.size(2) - 1]
+        y = y[:, 1:, 5:, 3:]
+        y = y[:, :, 1:13:1, :14]
+        y = y[:, : y.size(1) :, :, :]
         return x, y
+
 
 def test():
     net = Model()
@@ -45,16 +47,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_Tensor_slice.pt inputshape=[1,13,26],[1,15,19,21]")
 
     # ncnn inference
     import test_Tensor_slice_ncnn
+
     b = test_Tensor_slice_ncnn.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.allclose(a0, b0, 1e-4, 1e-4):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():

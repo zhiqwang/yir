@@ -16,20 +16,22 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x, y, z, w0, b0, w1, b1, w2, b2):
         x = F.layer_norm(x, (24,), w0, b0)
-        x = F.layer_norm(x, (12,24), None, None)
+        x = F.layer_norm(x, (12, 24), None, None)
 
         y = F.layer_norm(y, (16,), None, None, eps=1e-3)
-        y = F.layer_norm(y, (12,16), w1, b1)
+        y = F.layer_norm(y, (12, 16), w1, b1)
 
         z = F.layer_norm(z, (24,), w2, b2)
-        z = F.layer_norm(z, (12,16,24), None, None, eps=1e-2)
+        z = F.layer_norm(z, (12, 16, 24), None, None, eps=1e-2)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -54,13 +56,18 @@ def test():
 
     # torchscript to pnnx
     import os
-    os.system("../src/pnnx test_F_layer_norm.pt inputshape=[1,12,24],[2,3,12,16],[1,10,12,16,24],[24],[24],[12,16],[12,16],[24],[24]")
+
+    os.system(
+        "../src/pnnx test_F_layer_norm.pt inputshape=[1,12,24],[2,3,12,16],[1,10,12,16,24],[24],[24],[12,16],[12,16],[24],[24]"
+    )
 
     # pnnx inference
     import test_F_layer_norm_pnnx
+
     b0, b1, b2 = test_F_layer_norm_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2)
+
 
 if __name__ == "__main__":
     if test():

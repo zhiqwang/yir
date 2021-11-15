@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -26,6 +27,7 @@ class Model(nn.Module):
         z = F.prelu(z, w2)
         w = F.prelu(w, w3)
         return x, y, z, w
+
 
 def test():
     net = Model()
@@ -49,13 +51,18 @@ def test():
 
     # torchscript to pnnx
     import os
-    os.system("../src/pnnx test_F_prelu.pt inputshape=[1,16],[12,2,16],[1,3,12,16],[1,5,7,9,11],[16],[2],[3],[1]")
+
+    os.system(
+        "../src/pnnx test_F_prelu.pt inputshape=[1,16],[12,2,16],[1,3,12,16],[1,5,7,9,11],[16],[2],[3],[1]"
+    )
 
     # pnnx inference
     import test_F_prelu_pnnx
+
     b0, b1, b2, b3 = test_F_prelu_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2) and torch.equal(a3, b3)
+
 
 if __name__ == "__main__":
     if test():

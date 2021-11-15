@@ -15,6 +15,7 @@
 import torch
 import torchvision.models as models
 
+
 def test():
     net = models.squeezenet1_1()
     net.eval()
@@ -30,13 +31,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_squeezenet1_1.pt inputshape=[1,3,224,224]")
 
     # pnnx inference
     import test_squeezenet1_1_pnnx
+
     b = test_squeezenet1_1_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

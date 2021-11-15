@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -37,6 +38,7 @@ class Model(nn.Module):
         y = self.bn_1(y)
         return x, y
 
+
 def test():
     net = Model()
     net.eval()
@@ -53,13 +55,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_pnnx_fuse_linear_batchnorm1d.pt inputshape=[1,64],[12,64]")
 
     # pnnx inference
     import test_pnnx_fuse_linear_batchnorm1d_pnnx
+
     b0, b1 = test_pnnx_fuse_linear_batchnorm1d_pnnx.test_inference()
 
     return torch.allclose(a0, b0, 1e-4, 1e-4) and torch.allclose(a1, b1, 1e-4, 1e-4)
+
 
 if __name__ == "__main__":
     if test():

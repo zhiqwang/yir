@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -24,6 +25,7 @@ class Model(nn.Module):
         x = F.pixel_shuffle(x, 2)
         x = F.pixel_shuffle(x, 4)
         return x
+
 
 def test():
     net = Model()
@@ -40,13 +42,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_F_pixel_shuffle.pt inputshape=[1,128,6,7]")
 
     # pnnx inference
     import test_F_pixel_shuffle_pnnx
+
     b = test_F_pixel_shuffle_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

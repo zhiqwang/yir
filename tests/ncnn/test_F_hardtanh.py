@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -25,6 +26,7 @@ class Model(nn.Module):
         y = F.hardtanh(y, -1, 1)
         z = F.hardtanh(z, -0.1, 0.1)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -43,16 +45,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_F_hardtanh.pt inputshape=[1,16],[1,2,16],[1,3,12,16]")
 
     # ncnn inference
     import test_F_hardtanh_ncnn
+
     b = test_F_hardtanh_ncnn.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.allclose(a0, b0, 1e-4, 1e-4):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():

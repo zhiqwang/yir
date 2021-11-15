@@ -16,15 +16,17 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x, y, z):
         x = torch.sum(x, dim=1, keepdim=False)
-        y = torch.sum(y, dim=(2,3), keepdim=False)
+        y = torch.sum(y, dim=(2, 3), keepdim=False)
         z = torch.sum(z, dim=0, keepdim=True)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -43,16 +45,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_torch_sum.pt inputshape=[1,3,16],[1,5,9,11],[14,8,5,9,10]")
 
     # pnnx inference
     import test_torch_sum_pnnx
+
     b = test_torch_sum_pnnx.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.equal(a0, b0):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():

@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -29,6 +30,7 @@ class Model(nn.Module):
         z = self.act_1(z)
         w = self.act_1(w)
         return x, y, z, w
+
 
 def test():
     net = Model()
@@ -48,13 +50,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_LeakyReLU.pt inputshape=[1,12],[1,12,64],[1,12,24,64],[1,12,24,32,64]")
 
     # pnnx inference
     import test_nn_LeakyReLU_pnnx
+
     b0, b1, b2, b3 = test_nn_LeakyReLU_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2) and torch.equal(a3, b3)
+
 
 if __name__ == "__main__":
     if test():

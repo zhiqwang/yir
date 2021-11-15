@@ -16,17 +16,19 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x, w0, w1, b1):
         x = F.conv1d(x, w0, None, stride=2, padding=1)
-        if torch.__version__ < '1.9':
+        if torch.__version__ < "1.9":
             x = F.conv1d(x, w1, b1, stride=1, padding=1, dilation=2, groups=2)
         else:
-            x = F.conv1d(x, w1, b1, stride=1, padding='same', dilation=2, groups=2)
+            x = F.conv1d(x, w1, b1, stride=1, padding="same", dilation=2, groups=2)
         return x
+
 
 def test():
     net = Model()
@@ -46,13 +48,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_F_conv1d.pt inputshape=[1,12,52],[16,12,3],[16,8,5],[16]")
 
     # pnnx inference
     import test_F_conv1d_pnnx
+
     b = test_F_conv1d_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

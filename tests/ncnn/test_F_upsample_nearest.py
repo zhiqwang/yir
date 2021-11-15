@@ -16,14 +16,16 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x):
-        x = F.upsample_nearest(x, size=(12,12))
+        x = F.upsample_nearest(x, size=(12, 12))
         x = F.upsample_nearest(x, scale_factor=2)
         return x
+
 
 def test():
     net = Model()
@@ -40,13 +42,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_F_upsample_nearest.pt inputshape=[1,12,24,64]")
 
     # ncnn inference
     import test_F_upsample_nearest_ncnn
+
     b = test_F_upsample_nearest_ncnn.test_inference()
 
     return torch.allclose(a, b, 1e-4, 1e-4)
+
 
 if __name__ == "__main__":
     if test():

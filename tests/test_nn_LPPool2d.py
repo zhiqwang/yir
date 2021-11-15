@@ -16,17 +16,18 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
         self.pool_0 = nn.LPPool2d(norm_type=2, kernel_size=3)
         self.pool_1 = nn.LPPool2d(norm_type=2, kernel_size=4, stride=2)
-        self.pool_2 = nn.LPPool2d(norm_type=1, kernel_size=(1,3), stride=1, ceil_mode=False)
-        self.pool_3 = nn.LPPool2d(norm_type=1, kernel_size=(4,5), stride=(1,2), ceil_mode=True)
-        self.pool_4 = nn.LPPool2d(norm_type=1.2, kernel_size=(5,3), stride=(2,1), ceil_mode=False)
+        self.pool_2 = nn.LPPool2d(norm_type=1, kernel_size=(1, 3), stride=1, ceil_mode=False)
+        self.pool_3 = nn.LPPool2d(norm_type=1, kernel_size=(4, 5), stride=(1, 2), ceil_mode=True)
+        self.pool_4 = nn.LPPool2d(norm_type=1.2, kernel_size=(5, 3), stride=(2, 1), ceil_mode=False)
         self.pool_5 = nn.LPPool2d(norm_type=0.5, kernel_size=2, stride=1, ceil_mode=True)
-        self.pool_6 = nn.LPPool2d(norm_type=0.1, kernel_size=(5,4), stride=1, ceil_mode=False)
+        self.pool_6 = nn.LPPool2d(norm_type=0.1, kernel_size=(5, 4), stride=1, ceil_mode=False)
 
     def forward(self, x):
         x = self.pool_0(x)
@@ -37,6 +38,7 @@ class Model(nn.Module):
         x = self.pool_5(x)
         x = self.pool_6(x)
         return x
+
 
 def test():
     net = Model()
@@ -53,13 +55,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_LPPool2d.pt inputshape=[1,12,128,128]")
 
     # pnnx inference
     import test_nn_LPPool2d_pnnx
+
     b = test_nn_LPPool2d_pnnx.test_inference()
 
     return torch.equal(a, b)
+
 
 if __name__ == "__main__":
     if test():

@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -34,6 +35,7 @@ class Model(nn.Module):
         z = self.linear_1(z)
         return x, y, z
 
+
 def test():
     net = Model()
     net.eval()
@@ -51,13 +53,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_Linear.pt inputshape=[1,64],[12,64],[1,3,12,64]")
 
     # pnnx inference
     import test_nn_Linear_pnnx
+
     b0, b1, b2 = test_nn_Linear_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2)
+
 
 if __name__ == "__main__":
     if test():

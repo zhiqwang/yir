@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -30,6 +31,7 @@ class Model(nn.Module):
         y = self.shuffle_0(y)
         y = self.shuffle_1(y)
         return x, y
+
 
 def test():
     net = Model()
@@ -47,13 +49,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_ChannelShuffle.pt inputshape=[1,64,6,8],[1,96,7,9]")
 
     # pnnx inference
     import test_nn_ChannelShuffle_pnnx
+
     b0, b1 = test_nn_ChannelShuffle_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1)
+
 
 if __name__ == "__main__":
     if test():

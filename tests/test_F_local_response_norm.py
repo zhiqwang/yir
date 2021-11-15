@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -30,6 +31,7 @@ class Model(nn.Module):
         z = F.local_response_norm(z, 5)
         z = F.local_response_norm(z, size=3, alpha=0.1, beta=0.3, k=0.2)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -48,13 +50,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_F_local_response_norm.pt inputshape=[1,12,24],[2,3,12,16],[1,10,12,16,24]")
 
     # pnnx inference
     import test_F_local_response_norm_pnnx
+
     b0, b1, b2 = test_F_local_response_norm_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2)
+
 
 if __name__ == "__main__":
     if test():

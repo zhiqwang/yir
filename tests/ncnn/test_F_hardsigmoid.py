@@ -16,8 +16,10 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 def hardsigmoid_forward_0(x):
-    return F.relu6(x + 3., True) / 6.
+    return F.relu6(x + 3.0, True) / 6.0
+
 
 class Model(nn.Module):
     def __init__(self):
@@ -28,6 +30,7 @@ class Model(nn.Module):
         y = F.hardsigmoid(y)
         z = hardsigmoid_forward_0(z)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -46,16 +49,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_F_hardsigmoid.pt inputshape=[1,16],[1,2,16],[1,3,12,16]")
 
     # ncnn inference
     import test_F_hardsigmoid_ncnn
+
     b = test_F_hardsigmoid_ncnn.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.allclose(a0, b0, 1e-4, 1e-4):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():

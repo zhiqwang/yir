@@ -16,6 +16,7 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
@@ -28,6 +29,7 @@ class Model(nn.Module):
         z = z.view(4, 3, 30, 10, 14)
         z = z.view(15, 2, 10, 7, 8, 3)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -46,16 +48,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_Tensor_view.pt inputshape=[1,3,16],[1,5,9,11],[14,8,5,9,10]")
 
     # pnnx inference
     import test_Tensor_view_pnnx
+
     b = test_Tensor_view_pnnx.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.equal(a0, b0):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():

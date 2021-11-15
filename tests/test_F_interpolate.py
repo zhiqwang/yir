@@ -16,67 +16,83 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x, y, z):
         x = F.interpolate(x, size=16)
-        x = F.interpolate(x, scale_factor=2, mode='nearest')
-        x = F.interpolate(x, size=(20), mode='nearest')
-        x = F.interpolate(x, scale_factor=(4), mode='nearest')
-        x = F.interpolate(x, size=16, mode='linear')
-        x = F.interpolate(x, scale_factor=2, mode='linear')
-        x = F.interpolate(x, size=(24), mode='linear', align_corners=True)
-        x = F.interpolate(x, scale_factor=(3), mode='linear', align_corners=True)
+        x = F.interpolate(x, scale_factor=2, mode="nearest")
+        x = F.interpolate(x, size=(20), mode="nearest")
+        x = F.interpolate(x, scale_factor=(4), mode="nearest")
+        x = F.interpolate(x, size=16, mode="linear")
+        x = F.interpolate(x, scale_factor=2, mode="linear")
+        x = F.interpolate(x, size=(24), mode="linear", align_corners=True)
+        x = F.interpolate(x, scale_factor=(3), mode="linear", align_corners=True)
 
-        x = F.interpolate(x, scale_factor=1.5, mode='nearest', recompute_scale_factor=True)
-        x = F.interpolate(x, scale_factor=1.2, mode='linear', align_corners=False, recompute_scale_factor=True)
-        x = F.interpolate(x, scale_factor=0.8, mode='linear', align_corners=True, recompute_scale_factor=True)
+        x = F.interpolate(x, scale_factor=1.5, mode="nearest", recompute_scale_factor=True)
+        x = F.interpolate(
+            x, scale_factor=1.2, mode="linear", align_corners=False, recompute_scale_factor=True
+        )
+        x = F.interpolate(x, scale_factor=0.8, mode="linear", align_corners=True, recompute_scale_factor=True)
 
         y = F.interpolate(y, size=16)
-        y = F.interpolate(y, scale_factor=2, mode='nearest')
-        y = F.interpolate(y, size=(20,20), mode='nearest')
-        y = F.interpolate(y, scale_factor=(4,4), mode='nearest')
-        y = F.interpolate(y, size=(16,24), mode='nearest')
-        y = F.interpolate(y, scale_factor=(2,3), mode='nearest')
-        y = F.interpolate(y, size=16, mode='bilinear')
-        y = F.interpolate(y, scale_factor=2, mode='bilinear')
-        y = F.interpolate(y, size=(20,20), mode='bilinear', align_corners=False)
-        y = F.interpolate(y, scale_factor=(4,4), mode='bilinear', align_corners=False)
-        y = F.interpolate(y, size=(16,24), mode='bilinear', align_corners=True)
-        y = F.interpolate(y, scale_factor=(2,3), mode='bilinear', align_corners=True)
-        y = F.interpolate(y, size=16, mode='bicubic')
-        y = F.interpolate(y, scale_factor=2, mode='bicubic')
-        y = F.interpolate(y, size=(20,20), mode='bicubic', align_corners=False)
-        y = F.interpolate(y, scale_factor=(4,4), mode='bicubic', align_corners=False)
-        y = F.interpolate(y, size=(16,24), mode='bicubic', align_corners=True)
-        y = F.interpolate(y, scale_factor=(2,3), mode='bicubic', align_corners=True)
+        y = F.interpolate(y, scale_factor=2, mode="nearest")
+        y = F.interpolate(y, size=(20, 20), mode="nearest")
+        y = F.interpolate(y, scale_factor=(4, 4), mode="nearest")
+        y = F.interpolate(y, size=(16, 24), mode="nearest")
+        y = F.interpolate(y, scale_factor=(2, 3), mode="nearest")
+        y = F.interpolate(y, size=16, mode="bilinear")
+        y = F.interpolate(y, scale_factor=2, mode="bilinear")
+        y = F.interpolate(y, size=(20, 20), mode="bilinear", align_corners=False)
+        y = F.interpolate(y, scale_factor=(4, 4), mode="bilinear", align_corners=False)
+        y = F.interpolate(y, size=(16, 24), mode="bilinear", align_corners=True)
+        y = F.interpolate(y, scale_factor=(2, 3), mode="bilinear", align_corners=True)
+        y = F.interpolate(y, size=16, mode="bicubic")
+        y = F.interpolate(y, scale_factor=2, mode="bicubic")
+        y = F.interpolate(y, size=(20, 20), mode="bicubic", align_corners=False)
+        y = F.interpolate(y, scale_factor=(4, 4), mode="bicubic", align_corners=False)
+        y = F.interpolate(y, size=(16, 24), mode="bicubic", align_corners=True)
+        y = F.interpolate(y, scale_factor=(2, 3), mode="bicubic", align_corners=True)
 
-        y = F.interpolate(y, scale_factor=(1.7,2), mode='nearest', recompute_scale_factor=True)
-        y = F.interpolate(y, scale_factor=(2,1.2), mode='bilinear', align_corners=False, recompute_scale_factor=True)
-        y = F.interpolate(y, scale_factor=(0.5,0.4), mode='bilinear', align_corners=True, recompute_scale_factor=True)
-        y = F.interpolate(y, scale_factor=(0.8,0.9), mode='bicubic', align_corners=False, recompute_scale_factor=True)
-        y = F.interpolate(y, scale_factor=(1.1,0.5), mode='bicubic', align_corners=True, recompute_scale_factor=True)
+        y = F.interpolate(y, scale_factor=(1.7, 2), mode="nearest", recompute_scale_factor=True)
+        y = F.interpolate(
+            y, scale_factor=(2, 1.2), mode="bilinear", align_corners=False, recompute_scale_factor=True
+        )
+        y = F.interpolate(
+            y, scale_factor=(0.5, 0.4), mode="bilinear", align_corners=True, recompute_scale_factor=True
+        )
+        y = F.interpolate(
+            y, scale_factor=(0.8, 0.9), mode="bicubic", align_corners=False, recompute_scale_factor=True
+        )
+        y = F.interpolate(
+            y, scale_factor=(1.1, 0.5), mode="bicubic", align_corners=True, recompute_scale_factor=True
+        )
 
         z = F.interpolate(z, size=16)
-        z = F.interpolate(z, scale_factor=2, mode='nearest')
-        z = F.interpolate(z, size=(20,20,20), mode='nearest')
-        z = F.interpolate(z, scale_factor=(4,4,4), mode='nearest')
-        z = F.interpolate(z, size=(16,24,20), mode='nearest')
-        z = F.interpolate(z, scale_factor=(2,3,4), mode='nearest')
-        z = F.interpolate(z, size=16, mode='trilinear')
-        z = F.interpolate(z, scale_factor=2, mode='trilinear')
-        z = F.interpolate(z, size=(20,20,20), mode='trilinear', align_corners=False)
-        z = F.interpolate(z, scale_factor=(4,4,4), mode='trilinear', align_corners=False)
-        z = F.interpolate(z, size=(16,24,20), mode='trilinear', align_corners=True)
-        z = F.interpolate(z, scale_factor=(2,3,4), mode='trilinear', align_corners=True)
+        z = F.interpolate(z, scale_factor=2, mode="nearest")
+        z = F.interpolate(z, size=(20, 20, 20), mode="nearest")
+        z = F.interpolate(z, scale_factor=(4, 4, 4), mode="nearest")
+        z = F.interpolate(z, size=(16, 24, 20), mode="nearest")
+        z = F.interpolate(z, scale_factor=(2, 3, 4), mode="nearest")
+        z = F.interpolate(z, size=16, mode="trilinear")
+        z = F.interpolate(z, scale_factor=2, mode="trilinear")
+        z = F.interpolate(z, size=(20, 20, 20), mode="trilinear", align_corners=False)
+        z = F.interpolate(z, scale_factor=(4, 4, 4), mode="trilinear", align_corners=False)
+        z = F.interpolate(z, size=(16, 24, 20), mode="trilinear", align_corners=True)
+        z = F.interpolate(z, scale_factor=(2, 3, 4), mode="trilinear", align_corners=True)
 
-        z = F.interpolate(z, scale_factor=(1.5,2.5,2), mode='nearest', recompute_scale_factor=True)
-        z = F.interpolate(z, scale_factor=(0.7,0.5,1), mode='trilinear', align_corners=False, recompute_scale_factor=True)
-        z = F.interpolate(z, scale_factor=(0.9,0.8,1.2), mode='trilinear', align_corners=True, recompute_scale_factor=True)
+        z = F.interpolate(z, scale_factor=(1.5, 2.5, 2), mode="nearest", recompute_scale_factor=True)
+        z = F.interpolate(
+            z, scale_factor=(0.7, 0.5, 1), mode="trilinear", align_corners=False, recompute_scale_factor=True
+        )
+        z = F.interpolate(
+            z, scale_factor=(0.9, 0.8, 1.2), mode="trilinear", align_corners=True, recompute_scale_factor=True
+        )
 
         return x, y, z
+
 
 def test():
     net = Model()
@@ -95,13 +111,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_F_interpolate.pt inputshape=[1,3,32],[1,3,32,32],[1,3,32,32,32]")
 
     # pnnx inference
     import test_F_interpolate_pnnx
+
     b0, b1, b2 = test_F_interpolate_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2)
+
 
 if __name__ == "__main__":
     if test():

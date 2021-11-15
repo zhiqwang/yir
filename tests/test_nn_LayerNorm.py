@@ -16,12 +16,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
         self.ln_0 = nn.LayerNorm(64)
-        self.ln_1 = nn.LayerNorm(normalized_shape=(24,64), eps=1e-2, elementwise_affine=False)
+        self.ln_1 = nn.LayerNorm(normalized_shape=(24, 64), eps=1e-2, elementwise_affine=False)
 
     def forward(self, x, y, z):
         x = self.ln_0(x)
@@ -33,6 +34,7 @@ class Model(nn.Module):
         z = self.ln_0(z)
         z = self.ln_1(z)
         return x, y, z
+
 
 def test():
     net = Model()
@@ -51,13 +53,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_nn_LayerNorm.pt inputshape=[1,24,64],[1,12,24,64],[1,12,16,24,64]")
 
     # pnnx inference
     import test_nn_LayerNorm_pnnx
+
     b0, b1, b2 = test_nn_LayerNorm_pnnx.test_inference()
 
     return torch.equal(a0, b0) and torch.equal(a1, b1) and torch.equal(a2, b2)
+
 
 if __name__ == "__main__":
     if test():

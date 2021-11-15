@@ -15,6 +15,7 @@
 import torch
 import torchvision.models as models
 
+
 def test():
     net = models.mobilenet_v3_small()
     net.eval()
@@ -30,13 +31,16 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../src/pnnx test_mobilenet_v3_small.pt inputshape=[1,3,224,224]")
 
     # pnnx inference
     import test_mobilenet_v3_small_pnnx
+
     b = test_mobilenet_v3_small_pnnx.test_inference()
 
     return torch.allclose(a, b, 1e-4, 1e-4)
+
 
 if __name__ == "__main__":
     if test():

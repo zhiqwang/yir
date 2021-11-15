@@ -16,12 +16,13 @@ import torch
 import torch.nn as nn
 import torch.nn.functional as F
 
+
 class Model(nn.Module):
     def __init__(self):
         super(Model, self).__init__()
 
     def forward(self, x, y):
-        if torch.__version__ < '1.9':
+        if torch.__version__ < "1.9":
             x = x.permute(1, 0, 2)
             x = x.permute(0, 2, 1)
             x = x.permute(2, 0, 1)
@@ -34,6 +35,7 @@ class Model(nn.Module):
             y = torch.permute(y, (2, 3, 1, 0))
             y = torch.permute(y, (3, 1, 0, 2))
         return x, y
+
 
 def test():
     net = Model()
@@ -51,16 +53,19 @@ def test():
 
     # torchscript to pnnx
     import os
+
     os.system("../../src/pnnx test_torch_permute.pt inputshape=[1,3,16],[1,5,9,11]")
 
     # ncnn inference
     import test_torch_permute_ncnn
+
     b = test_torch_permute_ncnn.test_inference()
 
     for a0, b0 in zip(a, b):
         if not torch.allclose(a0, b0, 1e-4, 1e-4):
             return False
     return True
+
 
 if __name__ == "__main__":
     if test():
