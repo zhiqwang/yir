@@ -25,7 +25,7 @@ void solve_batch_index_forward(Operand* operand) {
   int batch_index = operand->params["__batch_index"].i;
 
   for (Operator* op : operand->consumers) {
-    if (op->type == "torch.permute") {
+    if (op->type == "torch.permute" || op->type == "Tensor.permute") {
       const std::vector<int>& dims = op->params.at("dims").ai;
 
       int batch_index_permuted = -1;
@@ -41,6 +41,28 @@ void solve_batch_index_forward(Operand* operand) {
           continue;
 
         r->params["__batch_index"] = batch_index_permuted;
+
+        solve_batch_index_forward(r);
+        solve_batch_index_backward(r);
+      }
+    } else if (op->type == "nn.RNN" || op->type == "nn.LSTM" || op->type == "nn.GRU") {
+      {
+        Operand* r = op->outputs[0];
+        if (r->params.find("__batch_index") != r->params.end())
+          continue;
+
+        r->params["__batch_index"] = batch_index;
+
+        solve_batch_index_forward(r);
+        solve_batch_index_backward(r);
+      }
+
+      for (size_t i = 1; i < op->outputs.size(); i++) {
+        Operand* r = op->outputs[i];
+        if (r->params.find("__batch_index") != r->params.end())
+          continue;
+
+        r->params["__batch_index"] = 1;
 
         solve_batch_index_forward(r);
         solve_batch_index_backward(r);

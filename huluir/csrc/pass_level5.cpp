@@ -26,7 +26,6 @@
 #include "pass_level5/fuse_convtranspose2d_batchnorm2d.h"
 #include "pass_level5/fuse_linear_batchnorm1d.h"
 #include "pass_level5/fuse_slice_indices.h"
-#include "pass_level5/unroll_rnn_op.h"
 
 namespace pnnx {
 
@@ -50,8 +49,6 @@ void pass_level5(Graph& g) {
   eliminate_view_reshape(g);
 
   fuse_channel_shuffle(g);
-
-  // unroll_rnn_op(g);
 
   dead_code_elimination(g);
 

@@ -20,6 +20,8 @@
 
 namespace pnnx {
 
+GraphRewriterPass::~GraphRewriterPass() {}
+
 const char* GraphRewriterPass::name_str() const {
   return type_str();
 }
@@ -177,9 +179,9 @@ static bool match_operator(
     }
   }
 
-  for (const auto& a : a->attrs) {
-    const std::string& akey = a.first;
-    const Attribute& aa = a.second;
+  for (const auto& p : a->attrs) {
+    const std::string& akey = p.first;
+    const Attribute& aa = p.second;
 
     // capture all attributes
     captured_attrs[b->name + '.' + akey] = aa;
