@@ -12,7 +12,7 @@ from setuptools import setup, find_packages
 PATH_ROOT = Path(__file__).parent.resolve()
 VERSION = "0.1.0a0"
 
-PACKAGE_NAME = "yir"
+PACKAGE_NAME = "huluir"
 sha = "Unknown"
 
 try:
@@ -35,7 +35,7 @@ def get_long_description():
     # Get the long description from the README file
     description = (PATH_ROOT / "README.md").read_text(encoding="utf-8")
     # replace relative repository path to absolute link to the release
-    static_url = f"https://raw.githubusercontent.com/zhiqwang/yir/v{VERSION}"
+    static_url = f"https://raw.githubusercontent.com/zhiqwang/huluir/v{VERSION}"
     description = description.replace("docs/source/_static/", f"{static_url}/docs/source/_static/")
     description = description.replace("notebooks/assets/", f"{static_url}/notebooks/assets/")
     return description
@@ -68,7 +68,7 @@ if __name__ == "__main__":
         author_email="me@zhiqwang.com",
         long_description=get_long_description(),
         long_description_content_type="text/markdown",
-        url="https://github.com/zhiqwang/yir",
+        url="https://github.com/zhiqwang/huluir",
         license="Apache License 2.0",
         packages=find_packages(exclude=["test", "deployment", "notebooks"]),
         zip_safe=False,
@@ -120,8 +120,8 @@ if __name__ == "__main__":
         # maintainers, and where to support the project financially. The key is
         # what's used to render the link text on PyPI.
         project_urls={  # Optional
-            "Bug Reports": "https://github.com/zhiqwang/yir/issues",
+            "Bug Reports": "https://github.com/zhiqwang/huluir/issues",
             "Funding": "https://zhiqwang.com",
-            "Source": "https://github.com/zhiqwang/yir/",
+            "Source": "https://github.com/zhiqwang/huluir/",
         },
     )
