@@ -5,8 +5,8 @@ https://packaging.python.org/guides/distributing-packages-using-setuptools/
 https://github.com/pypa/sampleproject
 """
 import distutils.command.clean
-import os
 import glob
+import os
 import shutil
 import subprocess
 from pathlib import Path
