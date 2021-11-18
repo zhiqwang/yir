@@ -4,11 +4,15 @@ See:
 https://packaging.python.org/guides/distributing-packages-using-setuptools/
 https://github.com/pypa/sampleproject
 """
+import distutils.command.clean
 import os
+import glob
+import shutil
 import subprocess
 from pathlib import Path
 
 from setuptools import setup, find_packages
+from torch.utils.cpp_extension import BuildExtension, CppExtension
 
 PATH_ROOT = Path(__file__).parent.resolve()
 VERSION = "0.1.0a0"
@@ -58,6 +62,50 @@ def load_requirements(path_dir=PATH_ROOT, file_name="requirements.txt", comment_
     return reqs
 
 
+def get_extensions():
+    this_dir = os.path.dirname(os.path.abspath(__file__))
+    extensions_dir = os.path.join(this_dir, "huluir", "csrc")
+
+    main_source = os.path.join(extensions_dir, "hulu.cpp")
+    sources = glob.glob(os.path.join(extensions_dir, "**", "*.cpp"))
+
+    sources = [main_source] + sources
+
+    extension = CppExtension
+
+    extra_compile_args = {"cxx": []}
+    define_macros = []
+
+    include_dirs = [extensions_dir]
+
+    ext_modules = [
+        extension(
+            "huluir._C",
+            sources,
+            include_dirs=include_dirs,
+            define_macros=define_macros,
+            extra_compile_args=extra_compile_args,
+        )
+    ]
+
+    return ext_modules
+
+
+class clean(distutils.command.clean.clean):
+    def run(self):
+        with open(".gitignore") as f:
+            ignores = f.read()
+            for wildcard in filter(None, ignores.split("\n")):
+                for filename in glob.glob(wildcard):
+                    try:
+                        os.remove(filename)
+                    except OSError:
+                        shutil.rmtree(filename, ignore_errors=True)
+
+        # It's an old-style class in Python 2.7...
+        distutils.command.clean.clean.run(self)
+
+
 if __name__ == "__main__":
     print(f"Building wheel {PACKAGE_NAME}-{VERSION}")
 
@@ -68,7 +116,7 @@ if __name__ == "__main__":
         version=version_huluir,
         description="Yet another IR",
         author="Zhiqiang Wang",
-        author_email="me@zhiqwang.com",
+        author_email="zhiqwang@foxmail.com",
         long_description=get_long_description(),
         long_description_content_type="text/markdown",
         url="https://github.com/zhiqwang/huluir",
@@ -126,5 +174,11 @@ if __name__ == "__main__":
             "Bug Reports": "https://github.com/zhiqwang/huluir/issues",
             "Funding": "https://zhiqwang.com",
             "Source": "https://github.com/zhiqwang/huluir/",
+        },
+        ext_modules=get_extensions(),
+        python_requires=">=3.6",
+        cmdclass={
+            "build_ext": BuildExtension.with_options(no_python_abi_suffix=True),
+            "clean": clean,
         },
     )
