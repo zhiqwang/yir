@@ -7,7 +7,7 @@ logs
 .DS_Store
 
 # Distribution / packaging
-yir/version.py
+huluir/version.py
 .Python
 build/
 develop-eggs/
