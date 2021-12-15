@@ -18,9 +18,7 @@ jobs:
           curl https://oss-clang-format.s3.us-east-2.amazonaws.com/linux64/clang-format-linux64 -o clang-format
           chmod +x clang-format
           sudo mv clang-format /opt/clang-format
-          curl https://raw.githubusercontent.com/zhiqwang/yolov5-rt-stack/main/tools/run_clang_format.py -o run_clang_format.py
-          chmod +x run_clang_format.py
-          .run_clang_format.py --files yir/csrc --recursive --clang_format_executable /opt/clang-format --style file --fix
+          python tools/run_clang_format.py --files huluir/csrc --recursive --clang_format_executable /opt/clang-format --style file --fix
       - name: Apply code-format changes
         uses: stefanzweifel/git-auto-commit-action@v4
         with:

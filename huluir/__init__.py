@@ -12,7 +12,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from yir.relay import *
+from huluir.relay import *
 
 try:
     from .version import __version__
