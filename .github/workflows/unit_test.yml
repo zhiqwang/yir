@@ -19,4 +19,4 @@ jobs:
       - name: Clone repository
         uses: actions/checkout@v3
       - name: Setup Ninja
-        uses: seanmiddleditch/gha-setup-ninja@v3
+        uses: seanmiddleditch/gha-setup-ninja@v4
