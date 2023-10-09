@@ -22,6 +22,6 @@ jobs:
           chmod +x run_clang_format.py
           .run_clang_format.py --files yir/csrc --recursive --clang_format_executable /opt/clang-format --style file --fix
       - name: Apply code-format changes
-        uses: stefanzweifel/git-auto-commit-action@v4
+        uses: stefanzweifel/git-auto-commit-action@v5
         with:
           commit_message: Apply code-format changes
